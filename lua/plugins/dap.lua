@@ -29,19 +29,36 @@ return {
       local dap = require("dap")
       local dapui = require("dapui")
 
-      dapui.setup()
+      -- Make the bottom console taller and split REPL/Console 50/50
+      dapui.setup({
+        layouts = {
+          {
+            elements = {
+              { id = "repl", size = 0.5 },
+              { id = "console", size = 0.5 },
+            },
+            size = 20, -- height in lines (increase/decrease as desired)
+            position = "bottom",
+          },
+          {
+            elements = { "scopes", "watches", "breakpoints", "stacks" },
+            size = 40, -- width in columns for the left sidebar
+            position = "left",
+          },
+        },
+      })
 
       -- Auto-open UI on session start
       dap.listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
       end
 
-      -- Keep UI open on errors: don't close on terminated/exited
+      -- Keep UI open on errors / termination
       dap.listeners.before.event_terminated["dapui_config"] = function()
-        -- do nothing -> UI stays open
+        -- intentionally no close -> UI stays open
       end
       dap.listeners.before.event_exited["dapui_config"] = function()
-        -- do nothing -> UI stays open
+        -- intentionally no close -> UI stays open
       end
     end,
   },
