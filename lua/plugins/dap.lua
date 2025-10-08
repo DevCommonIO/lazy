@@ -25,25 +25,30 @@ return {
 
       return keys
     end,
+
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
 
-      -- Make the bottom console taller and split REPL/Console 50/50
       dapui.setup({
         layouts = {
           {
             elements = {
-              { id = "repl", size = 0.5 },
-              { id = "console", size = 0.5 },
+              { id = "breakpoints", size = 0.10 },
+              { id = "scopes", size = 0.45 },
+              { id = "watches", size = 0.35 },
+              { id = "stacks", size = 0.10 },
             },
-            size = 20, -- height in lines (increase/decrease as desired)
-            position = "bottom",
+            size = 50, -- width of left sidebar
+            position = "left",
           },
           {
-            elements = { "scopes", "watches", "breakpoints", "stacks" },
-            size = 40, -- width in columns for the left sidebar
-            position = "left",
+            elements = {
+              { id = "repl", size = 0.56 }, -- REPL slightly bigger
+              { id = "console", size = 0.44 }, -- Console slightly smaller
+            },
+            size = 14, -- increased height of bottom window
+            position = "bottom",
           },
         },
       })
@@ -54,12 +59,17 @@ return {
       end
 
       -- Keep UI open on errors / termination
-      dap.listeners.before.event_terminated["dapui_config"] = function()
-        -- intentionally no close -> UI stays open
-      end
-      dap.listeners.before.event_exited["dapui_config"] = function()
-        -- intentionally no close -> UI stays open
-      end
+      dap.listeners.before.event_terminated["dapui_config"] = function() end
+      dap.listeners.before.event_exited["dapui_config"] = function() end
+
+      -- Highlight current execution line
+      vim.api.nvim_set_hl(0, "DapStoppedLine", { bg = "#3b4252", underline = true })
+      vim.fn.sign_define("DapStopped", {
+        text = "▶",
+        texthl = "DapStoppedLine",
+        linehl = "DapStoppedLine",
+        numhl = "DapStoppedLine",
+      })
     end,
   },
 }
