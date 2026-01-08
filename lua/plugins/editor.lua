@@ -1,4 +1,16 @@
+-- Treesitter compat for Telescope builtin.treesitter on newer Neovim
+if vim.treesitter and vim.treesitter.get_buf_lang == nil then
+  local language = vim.treesitter.language
+  if language and language.get_lang then
+    vim.treesitter.get_buf_lang = function(bufnr)
+      bufnr = bufnr or 0
+      return language.get_lang(vim.bo[bufnr].filetype)
+    end
+  end
+end
+
 return {
+
   {
     enabled = false,
     "folke/flash.nvim",
@@ -76,6 +88,33 @@ return {
         ";r",
         function()
           local builtin = require("telescope.builtin")
+
+          local function get_visual_selection_text()
+            local save_reg = vim.fn.getreg('"')
+            local save_type = vim.fn.getregtype('"')
+            vim.cmd('noau normal! "vy')
+            local text = vim.fn.getreg('"')
+            vim.fn.setreg('"', save_reg, save_type)
+            text = text:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+            return text
+          end
+
+          local selection = get_visual_selection_text()
+          -- exit visual mode so Telescope works properly
+          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+
+          builtin.live_grep({
+            additional_args = { "--hidden" },
+            default_text = selection,
+          })
+        end,
+        mode = "v",
+        desc = "Live Grep selected text",
+      },
+      {
+        ";r",
+        function()
+          local builtin = require("telescope.builtin")
           builtin.live_grep({
             additional_args = { "--hidden" },
           })
@@ -110,18 +149,37 @@ return {
         ";e",
         function()
           local builtin = require("telescope.builtin")
-          builtin.diagnostics()
+          builtin.diagnostics({
+            bufnr = 0,
+            initial_mode = "normal",
+          })
         end,
         desc = "Lists Diagnostics for all open buffers or a specific buffer",
       },
       {
         ";s",
         function()
-          local builtin = require("telescope.builtin")
-          builtin.treesitter()
+          local ok = pcall(require("telescope.builtin").treesitter)
+          if ok then
+            require("telescope.builtin").treesitter()
+          else
+            -- fallback: LSP document symbols
+            require("telescope.builtin").lsp_document_symbols({
+              symbol_width = 50,
+              show_line = false,
+            })
+          end
         end,
-        desc = "Lists Function names, variables, from Treesitter",
+        desc = "Lists Functions/Vars (TS; fallback to LSP symbols)",
       },
+      -- {
+      --   ";s",
+      --   function()
+      --     local builtin = require("telescope.builtin")
+      --     builtin.treesitter()
+      --   end,
+      --   desc = "Lists Function names, variables, from Treesitter",
+      -- },
       {
         ";c",
         function()

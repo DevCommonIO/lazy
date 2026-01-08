@@ -53,8 +53,6 @@ return {
     end,
   },
 
-  
-
   {
     "rcarriga/nvim-notify",
     opts = {
@@ -62,14 +60,14 @@ return {
     },
   },
 
-  {
-    "snacks.nvim",
-    opts = {
-      scroll = { enabled = false },
-    },
-    keys = {},
-  },
-
+  -- {
+  --   "snacks.nvim",
+  --   opts = {
+  --     scroll = { enabled = false },
+  --   },
+  --   keys = {},
+  -- },
+  --
   -- buffer line
   -- {
   --   "akinsho/bufferline.nvim",
