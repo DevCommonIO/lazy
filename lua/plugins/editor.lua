@@ -1,59 +1,5 @@
--- Treesitter compat for Telescope builtin.treesitter on newer Neovim
-if vim.treesitter and vim.treesitter.get_buf_lang == nil then
-  local language = vim.treesitter.language
-  if language and language.get_lang then
-    vim.treesitter.get_buf_lang = function(bufnr)
-      bufnr = bufnr or 0
-      return language.get_lang(vim.bo[bufnr].filetype)
-    end
-  end
-end
-
+-- File: lua/plugins/editor.lua
 return {
-
-  {
-    enabled = false,
-    "folke/flash.nvim",
-    ---@type Flash.Config
-    opts = {
-      search = {
-        forward = true,
-        multi_window = false,
-        wrap = false,
-        incremental = true,
-      },
-    },
-  },
-
-  {
-    "brenoprata10/nvim-highlight-colors",
-    event = "BufReadPre",
-    opts = {
-      render = "background",
-      enable_hex = true,
-      enable_short_hex = true,
-      enable_rgb = true,
-      enable_hsl = true,
-      enable_hsl_without_function = true,
-      enable_ansi = true,
-      enable_var_usage = true,
-      enable_tailwind = true,
-    },
-  },
-
-  {
-    "dinhhuy258/git.nvim",
-    event = "BufReadPre",
-    opts = {
-      keymaps = {
-        -- Open blame window
-        blame = "<Leader>gb",
-        -- Open file/folder in git repository
-        browse = "<Leader>go",
-      },
-    },
-  },
-
   {
     "nvim-telescope/telescope.nvim",
     dependencies = {
@@ -61,9 +7,10 @@ return {
         "nvim-telescope/telescope-fzf-native.nvim",
         build = "make",
       },
-      "nvim-telescope/telescope-file-browser.nvim",
     },
+
     keys = {
+      -- Find plugin files
       {
         "<leader>fP",
         function()
@@ -73,238 +20,163 @@ return {
         end,
         desc = "Find Plugin File",
       },
+
+      -- Files
       {
         ";f",
         function()
-          local builtin = require("telescope.builtin")
-          builtin.find_files({
-            no_ignore = false,
+          require("telescope.builtin").find_files({
             hidden = true,
+            no_ignore = false,
           })
         end,
-        desc = "Lists files in your current working directory, respects .gitignore",
+        desc = "Find files (respects .gitignore)",
       },
+
+      -- Grep (normal): word under cursor. Grep (visual): selection.
       {
         ";r",
         function()
           local builtin = require("telescope.builtin")
 
-          local function get_visual_selection_text()
-            local save_reg = vim.fn.getreg('"')
-            local save_type = vim.fn.getregtype('"')
-            vim.cmd('noau normal! "vy')
-            local text = vim.fn.getreg('"')
-            vim.fn.setreg('"', save_reg, save_type)
-            text = text:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
-            return text
+          local function rg_args()
+            return {
+              "--hidden",
+              "--glob",
+              "!.git/*",
+              "--glob",
+              "!**/node_modules/*",
+              "--glob",
+              "!**/dist/*",
+              "--glob",
+              "!**/.next/*",
+              "--glob",
+              "!**/target/*",
+              "--glob",
+              "!**/.venv/*",
+            }
           end
 
-          local selection = get_visual_selection_text()
-          -- exit visual mode so Telescope works properly
-          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "x", false)
+          local mode = vim.fn.mode()
+          if mode:match("[vV\22]") then
+            -- Visual selection -> default_text
+            local function get_visual_selection()
+              local bufnr = 0
+              local start = vim.api.nvim_buf_get_mark(bufnr, "<")
+              local finish = vim.api.nvim_buf_get_mark(bufnr, ">")
 
-          builtin.live_grep({
-            additional_args = { "--hidden" },
-            default_text = selection,
-          })
+              local srow, scol = start[1] - 1, start[2]
+              local erow, ecol = finish[1] - 1, finish[2]
+
+              if srow > erow or (srow == erow and scol > ecol) then
+                srow, erow = erow, srow
+                scol, ecol = ecol, scol
+              end
+
+              local lines = vim.api.nvim_buf_get_text(bufnr, srow, scol, erow, ecol + 1, {})
+              local text = table.concat(lines, "\n")
+              return text:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+            end
+
+            local selection = get_visual_selection()
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+
+            builtin.live_grep({
+              default_text = selection,
+              additional_args = function()
+                return rg_args()
+              end,
+            })
+          else
+            -- Normal mode -> word under cursor
+            local word = vim.fn.expand("<cword>")
+            builtin.live_grep({
+              default_text = word,
+              additional_args = function()
+                return rg_args()
+              end,
+            })
+          end
         end,
-        mode = "v",
-        desc = "Live Grep selected text",
+        mode = { "n", "v" },
+        desc = "Live Grep (word/selection)",
       },
-      {
-        ";r",
-        function()
-          local builtin = require("telescope.builtin")
-          builtin.live_grep({
-            additional_args = { "--hidden" },
-          })
-        end,
-        desc = "Search for a string in your current working directory and get results live as you type, respects .gitignore",
-      },
-      {
-        "\\\\",
-        function()
-          local builtin = require("telescope.builtin")
-          builtin.buffers()
-        end,
-        desc = "Lists open buffers",
-      },
-      {
-        ";t",
-        function()
-          local builtin = require("telescope.builtin")
-          builtin.help_tags()
-        end,
-        desc = "Lists available help tags and opens a new window with the relevant help info on <cr>",
-      },
+
+      -- Resume previous picker
       {
         ";;",
         function()
-          local builtin = require("telescope.builtin")
-          builtin.resume()
+          require("telescope.builtin").resume()
         end,
-        desc = "Resume the previous telescope picker",
+        desc = "Resume previous Telescope picker",
       },
+
+      -- Buffers
+      {
+        "\\\\",
+        function()
+          require("telescope.builtin").buffers()
+        end,
+        desc = "List open buffers",
+      },
+
+      -- Help
+      {
+        ";t",
+        function()
+          require("telescope.builtin").help_tags()
+        end,
+        desc = "Help tags",
+      },
+
+      -- Diagnostics (current buffer)
       {
         ";e",
         function()
-          local builtin = require("telescope.builtin")
-          builtin.diagnostics({
+          require("telescope.builtin").diagnostics({
             bufnr = 0,
             initial_mode = "normal",
           })
         end,
-        desc = "Lists Diagnostics for all open buffers or a specific buffer",
+        desc = "Diagnostics (current buffer)",
       },
+
+      -- Symbols: Treesitter if available, else LSP symbols
       {
         ";s",
         function()
-          local ok = pcall(require("telescope.builtin").treesitter)
-          if ok then
-            require("telescope.builtin").treesitter()
-          else
-            -- fallback: LSP document symbols
-            require("telescope.builtin").lsp_document_symbols({
-              symbol_width = 50,
-              show_line = false,
-            })
-          end
-        end,
-        desc = "Lists Functions/Vars (TS; fallback to LSP symbols)",
-      },
-      -- {
-      --   ";s",
-      --   function()
-      --     local builtin = require("telescope.builtin")
-      --     builtin.treesitter()
-      --   end,
-      --   desc = "Lists Function names, variables, from Treesitter",
-      -- },
-      {
-        ";c",
-        function()
           local builtin = require("telescope.builtin")
-          builtin.lsp_incoming_calls()
-        end,
-        desc = "Lists LSP incoming calls for word under the cursor",
-      },
-      {
-        "sf",
-        function()
-          local telescope = require("telescope")
-
-          local function telescope_buffer_dir()
-            return vim.fn.expand("%:p:h")
+          if builtin.treesitter then
+            builtin.treesitter()
+          else
+            builtin.lsp_document_symbols({ symbol_width = 50, show_line = false })
           end
-
-          telescope.extensions.file_browser.file_browser({
-            path = "%:p:h",
-            cwd = telescope_buffer_dir(),
-            respect_gitignore = false,
-            hidden = true,
-            grouped = true,
-            previewer = false,
-            initial_mode = "normal",
-            layout_config = { height = 40 },
-          })
         end,
-        desc = "Open File Browser with the path of the current buffer",
+        desc = "Symbols (Treesitter / LSP fallback)",
       },
     },
+
     config = function(_, opts)
       local telescope = require("telescope")
-      local actions = require("telescope.actions")
-      local fb_actions = require("telescope").extensions.file_browser.actions
 
-      opts.defaults = vim.tbl_deep_extend("force", opts.defaults, {
+      opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
         wrap_results = true,
         layout_strategy = "horizontal",
         layout_config = { prompt_position = "top" },
         sorting_strategy = "ascending",
         winblend = 0,
-        mappings = {
-          n = {},
-        },
       })
-      opts.pickers = {
+
+      opts.pickers = vim.tbl_deep_extend("force", opts.pickers or {}, {
         diagnostics = {
           theme = "ivy",
           initial_mode = "normal",
-          layout_config = {
-            preview_cutoff = 9999,
-          },
+          layout_config = { preview_cutoff = 9999 },
         },
-      }
-      opts.extensions = {
-        file_browser = {
-          theme = "dropdown",
-          -- disables netrw and use telescope-file-browser in its place
-          hijack_netrw = true,
-          mappings = {
-            -- your custom insert mode mappings
-            ["n"] = {
-              -- your custom normal mode mappings
-              ["N"] = fb_actions.create,
-              ["h"] = fb_actions.goto_parent_dir,
-              ["/"] = function()
-                vim.cmd("startinsert")
-              end,
-              ["<C-u>"] = function(prompt_bufnr)
-                for i = 1, 10 do
-                  actions.move_selection_previous(prompt_bufnr)
-                end
-              end,
-              ["<C-d>"] = function(prompt_bufnr)
-                for i = 1, 10 do
-                  actions.move_selection_next(prompt_bufnr)
-                end
-              end,
-              ["<PageUp>"] = actions.preview_scrolling_up,
-              ["<PageDown>"] = actions.preview_scrolling_down,
-            },
-          },
-        },
-      }
+      })
+
       telescope.setup(opts)
-      require("telescope").load_extension("fzf")
-      require("telescope").load_extension("file_browser")
+      telescope.load_extension("fzf")
     end,
-  },
-
-  {
-    "kazhala/close-buffers.nvim",
-    event = "VeryLazy",
-    keys = {
-      {
-        "<leader>th",
-        function()
-          require("close_buffers").delete({ type = "hidden" })
-        end,
-        "Close Hidden Buffers",
-      },
-      {
-        "<leader>tu",
-        function()
-          require("close_buffers").delete({ type = "nameless" })
-        end,
-        "Close Nameless Buffers",
-      },
-    },
-  },
-
-  {
-    "saghen/blink.cmp",
-    opts = {
-      completion = {
-        menu = {
-          winblend = vim.o.pumblend,
-        },
-      },
-      signature = {
-        window = {
-          winblend = vim.o.pumblend,
-        },
-      },
-    },
   },
 }

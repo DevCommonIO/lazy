@@ -1,37 +1,65 @@
+-- File: lua/plugins/lsp.lua
 return {
-  -- tools
   {
     "mason-org/mason.nvim",
     opts = function(_, opts)
+      opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
+        -- format / lint
         "stylua",
         "selene",
         "luacheck",
         "shellcheck",
         "shfmt",
+
+        -- LSP servers
         "tailwindcss-language-server",
         "typescript-language-server",
         "css-lsp",
+        "html-lsp",
+        "yaml-language-server",
       })
     end,
   },
 
-  -- lsp servers
   {
     "neovim/nvim-lspconfig",
     opts = {
       inlay_hints = { enabled = false },
+
       ---@type lspconfig.options
       servers = {
         cssls = {},
+        html = {},
+
+        yamlls = {
+          settings = {
+            yaml = { keyOrdering = false },
+          },
+        },
+
         tailwindcss = {
           root_dir = function(...)
-            return require("lspconfig.util").root_pattern(".git")(...)
+            local util = require("lspconfig.util")
+            return util.root_pattern(
+              "tailwind.config.js",
+              "tailwind.config.cjs",
+              "tailwind.config.mjs",
+              "tailwind.config.ts",
+              "postcss.config.js",
+              "postcss.config.cjs",
+              "postcss.config.mjs",
+              "postcss.config.ts",
+              "package.json",
+              ".git"
+            )(...)
           end,
         },
+
         tsserver = {
           root_dir = function(...)
-            return require("lspconfig.util").root_pattern(".git")(...)
+            local util = require("lspconfig.util")
+            return util.root_pattern("tsconfig.json", "jsconfig.json", "package.json", ".git")(...)
           end,
           single_file_support = false,
           settings = {
@@ -59,31 +87,13 @@ return {
             },
           },
         },
-        html = {},
-        yamlls = {
-          settings = {
-            yaml = {
-              keyOrdering = false,
-            },
-          },
-        },
+
         lua_ls = {
-          -- enabled = false,
           single_file_support = true,
           settings = {
             Lua = {
-              workspace = {
-                checkThirdParty = false,
-              },
-              completion = {
-                workspaceWord = true,
-                callSnippet = "Both",
-              },
-              misc = {
-                parameters = {
-                  -- "--log-level=trace",
-                },
-              },
+              workspace = { checkThirdParty = false },
+              completion = { workspaceWord = true, callSnippet = "Both" },
               hint = {
                 enable = true,
                 setType = false,
@@ -92,19 +102,11 @@ return {
                 semicolon = "Disable",
                 arrayIndex = "Disable",
               },
-              doc = {
-                privateName = { "^_" },
-              },
-              type = {
-                castNumberToInteger = true,
-              },
+              doc = { privateName = { "^_" } },
+              type = { castNumberToInteger = true },
               diagnostics = {
                 disable = { "incomplete-signature-doc", "trailing-space" },
-                -- enable = false,
-                groupSeverity = {
-                  strong = "Warning",
-                  strict = "Warning",
-                },
+                groupSeverity = { strong = "Warning", strict = "Warning" },
                 groupFileStatus = {
                   ["ambiguity"] = "Opened",
                   ["await"] = "Opened",
@@ -121,36 +123,13 @@ return {
                 },
                 unusedLocalExclude = { "_*" },
               },
-              format = {
-                enable = false,
-                defaultConfig = {
-                  indent_style = "space",
-                  indent_size = "2",
-                  continuation_indent_size = "2",
-                },
-              },
+              format = { enable = false },
             },
           },
         },
       },
+
       setup = {},
     },
   },
-  -- {
-  --   "neovim/nvim-lspconfig",
-  --   opts = function()
-  --     local keys = require("lazyvim.plugins.lsp.keymaps").get()
-  --     vim.list_extend(keys, {
-  --       {
-  --         "gd",
-  --         function()
-  --           -- DO NOT RESUSE WINDOW
-  --           require("telescope.builtin").lsp_definitions({ reuse_win = false })
-  --         end,
-  --         desc = "Goto Definition",
-  --         has = "definition",
-  --       },
-  --     })
-  --   end,
-  -- },
 }

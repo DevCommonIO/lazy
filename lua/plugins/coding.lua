@@ -48,6 +48,7 @@ return {
   -- copilot
   {
     "zbirenbaum/copilot.lua",
+    event = "InsertEnter",
     opts = {
       suggestion = {
         auto_trigger = true,
@@ -63,6 +64,8 @@ return {
       filetypes = {
         markdown = true,
         help = true,
+        ["dap-repl"] = false,
+        ["TelescopePrompt"] = false,
       },
     },
   },

@@ -1,67 +1,66 @@
+-- File: lua/plugins/copilot-chat.lua
 return {
-  -- Core Copilot (keep if you use it elsewhere)
-  { "zbirenbaum/copilot.lua", cmd = "Copilot", event = "InsertEnter", opts = {} },
-
   {
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = { "zbirenbaum/copilot.lua", "nvim-lua/plenary.nvim" },
     event = "VeryLazy",
 
-    -- Keep opts simple; don't require plugin internals here
     opts = {
-      -- window = { layout = "", width = 0.45, height = 0.6, border = "rounded" },
-      help = { providers = { "contexts", "commands", "prompts" } }, -- show contexts in help
-      -- Prompts that don't need requires
+      help = { providers = { "contexts", "commands", "prompts" } },
       prompts = {
-        ["Explain Selection"] = {
-          prompt = "Explain the selected code in detail and suggest improvements.",
-          system_prompt = "#selection",
-          selection = true,
-        },
-        ["Review Current Buffer"] = {
-          prompt = "Review the current buffer and provide actionable improvements.",
-          system_prompt = "#buffer",
-          selection = false,
-        },
-        ["Review All Open Buffers"] = {
-          prompt = "Review all open buffers together and provide a concise report.",
-          system_prompt = "#buffers",
-          selection = false,
-        },
-        ["Commit Message (Staged)"] = {
-          prompt = "Generate a concise, conventional commit message for the staged changes.",
-          system_prompt = "#git:staged",
-          selection = false,
-        },
+        ["Explain Selection"] = { prompt = "/Explain #selection" },
+        ["Review Current Buffer"] = { prompt = "/Review #buffer:active" },
+        ["Commit Message (Staged)"] = { prompt = "/Commit #gitdiff:staged" },
       },
     },
 
-    -- If you want to explicitly register contexts, do it AFTER load
     config = function(_, opts)
       require("CopilotChat").setup(opts)
-      -- Optional: only if available (guards against API changes)
-      local ok, ctx = pcall(require, "CopilotChat.context")
-      if ok and ctx then
-        require("CopilotChat").set_contexts({
-          buffer = ctx.buffer,
-          buffers = ctx.buffers,
-          file = ctx.file,
-          files = ctx.files,
-          git = ctx.git,
-          selection = ctx.selection,
-        })
-      end
     end,
 
     keys = function()
-      local keys = {
+      local function open_and_insert(text)
+        local chat = require("CopilotChat")
+        chat.open()
+        vim.schedule(function()
+          vim.api.nvim_feedkeys(text, "t", false)
+        end)
+      end
+
+      local function add_all_open_buffers_as_files(max_files)
+        local chat = require("CopilotChat")
+        chat.open()
+        vim.schedule(function()
+          local bufs = vim.fn.getbufinfo({ buflisted = 1 })
+          local seen, lines, count = {}, {}, 0
+
+          for _, b in ipairs(bufs) do
+            local name = b.name
+            if name ~= "" and vim.fn.filereadable(name) == 1 and not seen[name] then
+              seen[name] = true
+              table.insert(lines, "#file:" .. vim.fn.fnameescape(name))
+              count = count + 1
+              if max_files and count >= max_files then
+                break
+              end
+            end
+          end
+
+          if #lines > 0 then
+            vim.api.nvim_feedkeys(table.concat(lines, "\n") .. "\n", "t", false)
+          end
+        end)
+      end
+
+      local chat = require("CopilotChat")
+
+      return {
         { "<leader>a", desc = "AI", mode = { "n", "v" } },
 
-        -- Open/Toggle
         {
           "<leader>aa",
           function()
-            require("CopilotChat").open()
+            chat.open()
           end,
           desc = "Open Chat",
           mode = { "n", "v" },
@@ -69,94 +68,63 @@ return {
         {
           "<leader>at",
           function()
-            require("CopilotChat").toggle()
+            chat.toggle()
           end,
           desc = "Toggle Chat",
           mode = { "n", "v" },
         },
 
-        -- Ask (prefers selection if in visual mode)
         {
           "<leader>aq",
           function()
-            local chat = require("CopilotChat")
             if vim.fn.mode():match("[vV\22]") then
-              chat.ask({ selection = true })
+              chat.ask("#selection ")
             else
-              chat.ask({})
+              chat.ask("")
             end
           end,
           desc = "Ask (selection if visual)",
           mode = { "n", "v" },
         },
 
-        -- Quick context inserters
         {
           "<leader>ab",
           function()
-            require("CopilotChat").open()
-            vim.schedule(function()
-              vim.api.nvim_feedkeys("#buffer ", "t", false)
-            end)
+            open_and_insert("#buffer:active ")
           end,
-          desc = "Insert #buffer",
-          mode = { "n", "v" },
-        },
-        -- lua/plugins/copilot-chat.lua (inside the CopilotChat spec's keys)
-        {
-          "<leader>aB",
-          function()
-            local chat = require("CopilotChat")
-            chat.open()
-            vim.schedule(function()
-              local bufs = vim.fn.getbufinfo({ buflisted = 1 })
-              local lines = {}
-              for _, b in ipairs(bufs) do
-                if b.name ~= "" and vim.fn.filereadable(b.name) == 1 then
-                  table.insert(lines, "#file:" .. b.name)
-                end
-              end
-              if #lines > 0 then
-                vim.api.nvim_feedkeys(table.concat(lines, "\n") .. "\n", "t", false)
-              end
-            end)
-          end,
-          desc = "CopilotChat: add all open buffers as context",
+          desc = "Insert #buffer:active",
           mode = { "n", "v" },
         },
         {
           "<leader>aS",
           function()
-            require("CopilotChat").open()
-            vim.schedule(function()
-              vim.api.nvim_feedkeys("#selection ", "t", false)
-            end)
+            open_and_insert("#selection ")
           end,
           desc = "Insert #selection",
           mode = { "n", "v" },
         },
 
-        -- Predefined prompts
+        {
+          "<leader>aB",
+          function()
+            add_all_open_buffers_as_files(12)
+          end,
+          desc = "Add open buffers as #file",
+          mode = { "n", "v" },
+        },
+
         {
           "<leader>ar",
           function()
-            require("CopilotChat").select_prompt("Review Current Buffer")
+            open_and_insert("/Review #buffer:active\n")
           end,
-          desc = "Review current buffer",
-          mode = "n",
-        },
-        {
-          "<leader>aR",
-          function()
-            require("CopilotChat").select_prompt("Review All Open Buffers")
-          end,
-          desc = "Review all open buffers",
+          desc = "Review buffer",
           mode = "n",
         },
         {
           "<leader>ae",
           function()
-            require("CopilotChat").select_prompt("Explain Selection")
+            open_and_insert("/Explain #selection\n")
           end,
           desc = "Explain selection",
           mode = "v",
@@ -164,21 +132,21 @@ return {
         {
           "<leader>ac",
           function()
-            require("CopilotChat").select_prompt("Commit Message (Staged)")
+            open_and_insert("/Commit #gitdiff:staged\n")
           end,
-          desc = "Commit message (staged)",
+          desc = "Commit message",
           mode = "n",
         },
+
         {
           "<leader>ax",
           function()
-            require("CopilotChat").reset()
+            chat.reset()
           end,
           desc = "Reset Chat",
           mode = { "n", "v" },
         },
       }
-      return keys
     end,
   },
 }

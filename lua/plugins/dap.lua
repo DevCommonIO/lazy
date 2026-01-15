@@ -4,64 +4,94 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
       "rcarriga/nvim-dap-ui",
-      "mfussenegger/nvim-dap-python", -- ✅ Python adapter helper
-      "nvim-neotest/nvim-nio", -- ✅ required by dap-ui in many setups
+      "mfussenegger/nvim-dap-python",
+      "nvim-neotest/nvim-nio",
     },
 
-    keys = function(_, keys)
+    keys = function()
       local dap = require("dap")
+      local dapui_ok, dapui = pcall(require, "dapui")
 
-      keys = {}
+      -- Clean up all debug output when a session ends
+      local function clean_debug_views()
+        pcall(dap.repl.clear) -- clears REPL buffer
+        pcall(dapui.close) -- closes dap-ui windows (repl, console, scopes, etc)
+      end
 
-      -- Auto-scroll DAP REPL to bottom on new output
-      vim.api.nvim_create_autocmd("BufWinEnter", {
-        pattern = "DAP REPL",
-        callback = function(args)
-          local bufnr = args.buf
-          vim.api.nvim_create_autocmd({ "TextChanged", "TextChangedI", "BufWritePost" }, {
-            buffer = bufnr,
-            callback = function()
-              vim.api.nvim_win_set_cursor(0, { vim.api.nvim_buf_line_count(bufnr), 0 })
-            end,
-          })
-        end,
-      })
+      dap.listeners.before.event_terminated["clean_on_stop"] = clean_debug_views
+      dap.listeners.before.event_exited["clean_on_stop"] = clean_debug_views
 
-      vim.keymap.set({ "n", "i", "t" }, "<F8>", function()
-        local dap = require("dap")
+      return {
+        { "<F5>", dap.continue, desc = "Debug: Start/Continue" },
+        { "<F10>", dap.step_over, desc = "Debug: Step Over" },
+        { "<F11>", dap.step_into, desc = "Debug: Step Into" },
+        { "<F12>", dap.step_out, desc = "Debug: Step Out" },
 
-        -- If pressed from terminal-mode (DAP console), exit terminal-mode first
-        if vim.fn.mode() == "t" then
-          vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
-        end
+        { "<leader>db", dap.toggle_breakpoint, desc = "Debug: Toggle Breakpoint" },
+        {
+          "<leader>dB",
+          function()
+            dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+          end,
+          desc = "Debug: Conditional Breakpoint",
+        },
+        { "<leader>dr", dap.repl.open, desc = "Debug: Open REPL" },
+        { "<leader>dl", dap.run_last, desc = "Debug: Run Last" },
 
-        -- Stop session (terminate is usually enough; disconnect/close are fine too)
-        dap.terminate()
-        dap.disconnect()
-        dap.close()
-      end, { desc = "Debug: Stop", silent = true })
+        {
+          "<leader>du",
+          function()
+            if dapui_ok then
+              dapui.toggle()
+            end
+          end,
+          desc = "Debug: Toggle UI",
+        },
 
-      vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Start/Continue" })
-      vim.keymap.set("n", "<F10>", dap.step_over, { desc = "Debug: Step Over" })
-      vim.keymap.set("n", "<F11>", dap.step_into, { desc = "Debug: Step Into" })
-      vim.keymap.set("n", "<F12>", dap.step_out, { desc = "Debug: Step Out" })
-      vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
-      vim.keymap.set("n", "<leader>dB", function()
-        dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-      end, { desc = "Debug: Set Conditional Breakpoint" })
-      vim.keymap.set("n", "<leader>dr", dap.repl.open, { desc = "Debug: Open REPL" })
-      vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Debug: Run Last" })
+        -- Stop
+        {
+          "<F8>",
+          function()
+            if vim.fn.mode() == "t" then
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
+            end
+            dap.terminate()
+            dap.disconnect({ terminateDebuggee = true })
+            dap.close()
+          end,
+          mode = { "n", "i", "t" },
+          desc = "Debug: Stop",
+          silent = true,
+        },
+        {
+          "<leader>dx",
+          function()
+            dap.terminate()
+            dap.disconnect({ terminateDebuggee = true })
+            dap.close()
+            if dapui_ok then
+              dapui.close()
+            end
+          end,
+          desc = "Debug: Stop",
+        },
 
-      -- ✅ Python test helpers (optional but super useful)
-      vim.keymap.set("n", "<leader>dtm", function()
-        require("dap-python").test_method()
-      end, { desc = "Debug: Python test (method)" })
-
-      vim.keymap.set("n", "<leader>dtc", function()
-        require("dap-python").test_class()
-      end, { desc = "Debug: Python test (class)" })
-
-      return keys
+        -- Python test helpers
+        {
+          "<leader>dtm",
+          function()
+            require("dap-python").test_method()
+          end,
+          desc = "Debug: Python test (method)",
+        },
+        {
+          "<leader>dtc",
+          function()
+            require("dap-python").test_class()
+          end,
+          desc = "Debug: Python test (class)",
+        },
+      }
     end,
 
     config = function()
@@ -69,6 +99,21 @@ return {
       local dapui = require("dapui")
 
       dapui.setup({
+        icons = { expanded = "▾", collapsed = "▸", current_frame = "▶" },
+        mappings = {
+          expand = { "<CR>", "<2-LeftMouse>" },
+          open = "o",
+          remove = "d",
+          edit = "e",
+          repl = "r",
+          toggle = "t",
+        },
+        element_mappings = {},
+        expand_lines = true,
+        controls = { enabled = true, element = "repl" },
+        floating = { border = "single", mappings = { close = { "q", "<Esc>" } } },
+        windows = { indent = 1 },
+        render = { max_type_length = nil, max_value_lines = 100 },
         layouts = {
           {
             elements = {
@@ -91,18 +136,54 @@ return {
         },
       })
 
-      -- ✅ Use Mason-installed debugpy (recommended)
-      -- Ensure :Mason -> install "debugpy"
-      local mason_dbgpy = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+      -- Auto-scroll DAP REPL (robust: based on filetype)
+      local aug = vim.api.nvim_create_augroup("DapReplAutoscroll", { clear = true })
+      vim.api.nvim_create_autocmd("FileType", {
+        group = aug,
+        pattern = "dap-repl",
+        callback = function(args)
+          local bufnr = args.buf
 
-      -- ✅ Prefer project venv if present
+          -- Only scroll when new output arrives (TextChanged),
+          -- NOT while you're typing (TextChangedI).
+          vim.api.nvim_create_autocmd("TextChanged", {
+            group = aug,
+            buffer = bufnr,
+            callback = function()
+              local win = vim.fn.bufwinid(bufnr)
+              if win == -1 then
+                return
+              end
+
+              -- If you're currently in insert mode, don't move cursor.
+              if vim.fn.mode():match("i") then
+                return
+              end
+
+              vim.api.nvim_win_set_cursor(win, { vim.api.nvim_buf_line_count(bufnr), 0 })
+            end,
+          })
+        end,
+      })
+
+      -- Python adapter (debugpy)
+      local mason_dbgpy = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+      local function resolve_debugpy_python()
+        if vim.fn.executable(mason_dbgpy) == 1 then
+          return mason_dbgpy
+        end
+        local p3 = vim.fn.exepath("python3")
+        if p3 ~= "" then
+          return p3
+        end
+        return vim.fn.exepath("python")
+      end
+
       local function python_from_venv()
         local venv = os.getenv("VIRTUAL_ENV")
         if venv and #venv > 0 then
           return venv .. "/bin/python"
         end
-
-        -- common local venv folders
         local cwd = vim.fn.getcwd()
         local candidates = {
           cwd .. "/.venv/bin/python",
@@ -114,18 +195,15 @@ return {
             return p
           end
         end
-
-        return mason_dbgpy
+        return resolve_debugpy_python()
       end
 
-      -- ✅ Setup dap-python (registers debugpy adapter)
-      require("dap-python").setup(mason_dbgpy)
-      require("dap-python").test_runner = "pytest" -- optional
+      require("dap-python").setup(resolve_debugpy_python())
+      require("dap-python").test_runner = "pytest"
 
-      -- ✅ Python configurations (launch current file)
       dap.configurations.python = {
         {
-          type = "python", -- dap-python registers adapter as "python"
+          type = "python",
           request = "launch",
           name = "Launch file",
           program = "${file}",
@@ -140,12 +218,8 @@ return {
         dapui.open()
       end
 
-      -- Keep UI open on errors / termination (as you wanted)
-      dap.listeners.before.event_terminated["dapui_config"] = function() end
-      dap.listeners.before.event_exited["dapui_config"] = function() end
-
-      -- Highlight current execution line
-      vim.api.nvim_set_hl(0, "DapStoppedLine", { bg = "#3b4252", underline = true })
+      -- Highlight current execution line (theme-friendly)
+      vim.api.nvim_set_hl(0, "DapStoppedLine", { link = "Visual" })
       vim.fn.sign_define("DapStopped", {
         text = "▶",
         texthl = "DapStoppedLine",
