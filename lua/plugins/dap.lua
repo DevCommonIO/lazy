@@ -56,8 +56,6 @@ return {
               vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", false)
             end
             dap.terminate()
-            dap.disconnect({ terminateDebuggee = true })
-            dap.close()
           end,
           mode = { "n", "i", "t" },
           desc = "Debug: Stop",
@@ -67,11 +65,6 @@ return {
           "<leader>dx",
           function()
             dap.terminate()
-            dap.disconnect({ terminateDebuggee = true })
-            dap.close()
-            if dapui_ok then
-              dapui.close()
-            end
           end,
           desc = "Debug: Stop",
         },
