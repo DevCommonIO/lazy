@@ -32,7 +32,47 @@ return {
         end,
         desc = "Find files (respects .gitignore)",
       },
+      -- Current buffer search (fuzzy find)
+      {
+        ";b",
+        function()
+          local builtin = require("telescope.builtin")
 
+          local mode = vim.fn.mode()
+          if mode:match("[vV\22]") then
+            -- Use visual selection as initial query
+            local bufnr = 0
+            local start = vim.api.nvim_buf_get_mark(bufnr, "<")
+            local finish = vim.api.nvim_buf_get_mark(bufnr, ">")
+
+            local srow, scol = start[1] - 1, start[2]
+            local erow, ecol = finish[1] - 1, finish[2]
+            if srow > erow or (srow == erow and scol > ecol) then
+              srow, erow = erow, srow
+              scol, ecol = ecol, scol
+            end
+
+            local lines = vim.api.nvim_buf_get_text(bufnr, srow, scol, erow, ecol + 1, {})
+            local selection =
+              table.concat(lines, "\n"):gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+
+            builtin.current_buffer_fuzzy_find({
+              default_text = selection,
+              previewer = false,
+            })
+          else
+            -- Normal mode: prefill with word under cursor
+            builtin.current_buffer_fuzzy_find({
+              default_text = vim.fn.expand("<cword>"),
+              previewer = false,
+            })
+          end
+        end,
+        mode = { "n", "v" },
+        desc = "Buffer search (word/selection)",
+      },
       -- Grep (normal): word under cursor. Grep (visual): selection.
       {
         ";r",
