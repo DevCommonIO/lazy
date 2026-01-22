@@ -168,14 +168,24 @@ return {
         end,
         desc = "Help tags",
       },
-
+      {
+        ";w",
+        function()
+          require("telescope.builtin").diagnostics({
+            initial_mode = "normal",
+            theme = "ivy",
+          })
+        end,
+        desc = "Diagnostics (workspace)",
+      },
       -- Diagnostics (current buffer)
       {
-        ";e",
+        ";x",
         function()
           require("telescope.builtin").diagnostics({
             bufnr = 0,
             initial_mode = "normal",
+            theme = "ivy",
           })
         end,
         desc = "Diagnostics (current buffer)",
