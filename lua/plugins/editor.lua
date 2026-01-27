@@ -60,13 +60,23 @@ return {
 
             builtin.current_buffer_fuzzy_find({
               default_text = selection,
-              previewer = false,
+              previewer = true,
+              initial_mode = "insert",
+              sorting_strategy = "ascending",
+              layout_config = {
+                prompt_position = "top",
+              },
             })
           else
             -- Normal mode: prefill with word under cursor
             builtin.current_buffer_fuzzy_find({
               default_text = vim.fn.expand("<cword>"),
-              previewer = false,
+              previewer = true,
+              initial_mode = "insert",
+              sorting_strategy = "ascending",
+              layout_config = {
+                prompt_position = "top",
+              },
             })
           end
         end,
@@ -174,6 +184,12 @@ return {
           require("telescope.builtin").diagnostics({
             initial_mode = "normal",
             theme = "ivy",
+            sorting_strategy = "ascending",
+            layout_config = {
+              prompt_position = "top",
+              preview_cutoff = 0, -- always show preview
+            },
+            previewer = true, -- 🔑 enables the right-side preview
           })
         end,
         desc = "Diagnostics (workspace)",
@@ -183,14 +199,19 @@ return {
         ";x",
         function()
           require("telescope.builtin").diagnostics({
-            bufnr = 0,
-            initial_mode = "normal",
-            theme = "ivy",
+            bufnr = 0, -- current buffer only
+            theme = "ivy", -- same look as ;r / ;b
+            initial_mode = "insert", -- type immediately
+            sorting_strategy = "ascending",
+            layout_config = {
+              prompt_position = "top",
+              preview_cutoff = 0, -- always show preview
+            },
+            previewer = true, -- 🔑 enables the right-side preview
           })
         end,
         desc = "Diagnostics (current buffer)",
       },
-
       -- Symbols: Treesitter if available, else LSP symbols
       {
         ";s",

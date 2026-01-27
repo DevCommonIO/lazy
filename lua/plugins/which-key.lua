@@ -1,14 +1,16 @@
 return {
   {
     "folke/which-key.nvim",
+    keys = {
+      { ";", mode = { "n", "v" } },
+    },
     opts = function(_, opts)
       opts = opts or {}
       opts.spec = opts.spec or {}
 
-      -- Tell which-key that ";" is a prefix and give it a name
-      table.insert(opts.spec, { ";", group = "Search" })
+      opts.delay = 200
 
-      -- (optional) also label your AI prefix if you want
+      table.insert(opts.spec, { ";", group = "Search" })
       table.insert(opts.spec, { "<leader>a", group = "AI" })
       table.insert(opts.spec, { "<leader>d", group = "Debug" })
 

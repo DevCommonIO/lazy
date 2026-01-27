@@ -15,7 +15,7 @@ return {
       -- Clean up all debug output when a session ends
       local function clean_debug_views()
         pcall(dap.repl.clear) -- clears REPL buffer
-        pcall(dapui.close) -- closes dap-ui windows (repl, console, scopes, etc)
+        -- pcall(dapui.close) -- closes dap-ui windows (repl, console, scopes, etc)
       end
 
       dap.listeners.before.event_terminated["clean_on_stop"] = clean_debug_views
