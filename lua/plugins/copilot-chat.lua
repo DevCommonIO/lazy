@@ -7,6 +7,7 @@ return {
 
     opts = {
       help = { providers = { "contexts", "commands", "prompts" } },
+      model = "claude-sonnet-4.5", -- default model name
       prompts = {
         ["Explain Selection"] = { prompt = "/Explain #selection" },
         ["Review Current Buffer"] = { prompt = "/Review #buffer:active" },
