@@ -27,6 +27,24 @@ return {
     opts = {
       inlay_hints = { enabled = false },
 
+      -- Diagnostics behavior (virtual text + float popup)
+      diagnostics = {
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+
+        -- keep or tweak; set to false if you want NO inline text
+        virtual_text = false,
+        virtual_lines = false,
+        -- settings for :lua vim.diagnostic.open_float(...)
+        float = {
+          border = "rounded",
+          source = "if_many",
+          header = "",
+          prefix = "",
+        },
+      },
+
       ---@type lspconfig.options
       servers = {
         cssls = {},
@@ -129,7 +147,45 @@ return {
         },
       },
 
-      setup = {},
+      -- Hook into LazyVim's LSP attach flow
+      setup = {
+        -- runs for all servers
+        ["*"] = function()
+          vim.opt.updatetime = 500
+
+          vim.diagnostic.config({
+            float = {
+              wrap = true,
+              max_width = 100,
+            },
+          })
+
+          local group = vim.api.nvim_create_augroup("DiagnosticFloatOnHover", { clear = true })
+          vim.api.nvim_create_autocmd("CursorHold", {
+            group = group,
+            callback = function()
+              vim.diagnostic.open_float(nil, {
+                focus = false,
+                scope = "cursor",
+              })
+            end,
+          })
+
+          vim.keymap.set("n", "<leader>ux", function()
+            local cfg = vim.diagnostic.config()
+
+            local vt_enabled = cfg.virtual_text ~= false
+            local vl_enabled = cfg.virtual_lines == true
+
+            local enable = not (vt_enabled or vl_enabled)
+
+            vim.diagnostic.config({
+              virtual_text = enable and { spacing = 2, prefix = "●" } or false,
+              virtual_lines = false, -- keep OFF unless you want to toggle it too
+            })
+          end, { desc = "Toggle inline diagnostics text" })
+        end,
+      },
     },
   },
 }

@@ -12,14 +12,24 @@ return {
       local dap = require("dap")
       local dapui_ok, dapui = pcall(require, "dapui")
 
-      -- Clean up all debug output when a session ends
+      -- Keep DAP UI open; only clear REPL output when session ends
       local function clean_debug_views()
-        pcall(dap.repl.clear) -- clears REPL buffer
-        -- pcall(dapui.close) -- closes dap-ui windows (repl, console, scopes, etc)
+        pcall(dap.repl.clear)
       end
 
       dap.listeners.before.event_terminated["clean_on_stop"] = clean_debug_views
       dap.listeners.before.event_exited["clean_on_stop"] = clean_debug_views
+
+      local function dap_run_by_name(name)
+        local ft = vim.bo.filetype
+        local cfgs = dap.configurations[ft] or {}
+        for _, c in ipairs(cfgs) do
+          if c.name == name then
+            return dap.run(c)
+          end
+        end
+        vim.notify(("No DAP config '%s' for filetype '%s'"):format(name, ft), vim.log.levels.WARN)
+      end
 
       return {
         { "<F5>", dap.continue, desc = "Debug: Start/Continue" },
@@ -35,6 +45,7 @@ return {
           end,
           desc = "Debug: Conditional Breakpoint",
         },
+
         { "<leader>dr", dap.repl.open, desc = "Debug: Open REPL" },
         { "<leader>dl", dap.run_last, desc = "Debug: Run Last" },
 
@@ -48,7 +59,7 @@ return {
           desc = "Debug: Toggle UI",
         },
 
-        -- Stop
+        -- Stop (keep UI open)
         {
           "<F8>",
           function()
@@ -84,6 +95,22 @@ return {
           end,
           desc = "Debug: Python test (class)",
         },
+
+        -- Jest (Node) debugging
+        {
+          "<leader>dtf",
+          function()
+            dap_run_by_name("Jest: current file")
+          end,
+          desc = "Debug: Jest current file",
+        },
+        {
+          "<leader>dta",
+          function()
+            dap_run_by_name("Jest: all tests (yarn test)")
+          end,
+          desc = "Debug: Jest all tests",
+        },
       }
     end,
 
@@ -101,7 +128,6 @@ return {
           repl = "r",
           toggle = "t",
         },
-        element_mappings = {},
         expand_lines = true,
         controls = { enabled = true, element = "repl" },
         floating = { border = "single", mappings = { close = { "q", "<Esc>" } } },
@@ -129,16 +155,20 @@ return {
         },
       })
 
-      -- Auto-scroll DAP REPL (robust: based on filetype)
+      -- Auto-open UI on session start (but DO NOT auto-close on end)
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated["dapui_config"] = function() end
+      dap.listeners.before.event_exited["dapui_config"] = function() end
+
+      -- Auto-scroll DAP REPL (only on new output, not while typing)
       local aug = vim.api.nvim_create_augroup("DapReplAutoscroll", { clear = true })
       vim.api.nvim_create_autocmd("FileType", {
         group = aug,
         pattern = "dap-repl",
         callback = function(args)
           local bufnr = args.buf
-
-          -- Only scroll when new output arrives (TextChanged),
-          -- NOT while you're typing (TextChangedI).
           vim.api.nvim_create_autocmd("TextChanged", {
             group = aug,
             buffer = bufnr,
@@ -147,20 +177,20 @@ return {
               if win == -1 then
                 return
               end
-
-              -- If you're currently in insert mode, don't move cursor.
               if vim.fn.mode():match("i") then
                 return
               end
-
               vim.api.nvim_win_set_cursor(win, { vim.api.nvim_buf_line_count(bufnr), 0 })
             end,
           })
         end,
       })
 
+      -- ----------------------------
       -- Python adapter (debugpy)
+      -- ----------------------------
       local mason_dbgpy = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
+
       local function resolve_debugpy_python()
         if vim.fn.executable(mason_dbgpy) == 1 then
           return mason_dbgpy
@@ -206,12 +236,69 @@ return {
         },
       }
 
-      -- Auto-open UI on session start
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
+      -- ----------------------------
+      -- Node/TS adapter + Jest configs
+      -- (dap-js.lua provides nvim-dap-vscode-js + vscode-js-debug)
+      -- ----------------------------
+      local function project_root()
+        local cwd = vim.fn.getcwd()
+        local git = vim.fn.finddir(".git", cwd .. ";")
+        if git ~= "" then
+          return vim.fn.fnamemodify(git, ":h")
+        end
+        return cwd
       end
 
-      -- Highlight current execution line (theme-friendly)
+      local function node()
+        local n = vim.fn.exepath("node")
+        return n ~= "" and n or "node"
+      end
+
+      local root = project_root()
+
+      local function jest_bin()
+        local p = root .. "/node_modules/jest/bin/jest.js"
+        if vim.fn.filereadable(p) == 1 then
+          return p
+        end
+        -- fallback (some setups)
+        return root .. "/node_modules/.bin/jest"
+      end
+
+      local jest_configs = {
+        {
+          type = "pwa-node",
+          request = "launch",
+          name = "Jest: current file",
+          cwd = root,
+          runtimeExecutable = node(),
+          program = jest_bin(),
+          args = { "--runTestsByPath", "${file}", "--watchAll=false", "--runInBand" },
+          console = "integratedTerminal",
+          internalConsoleOptions = "neverOpen",
+          sourceMaps = true,
+          skipFiles = { "<node_internals>/**", "**/node_modules/**" },
+        },
+        {
+          type = "pwa-node",
+          request = "launch",
+          name = "Jest: all tests (yarn test)",
+          cwd = root,
+          runtimeExecutable = node(),
+          program = jest_bin(),
+          args = { "--watchAll=false", "--runInBand" },
+          console = "integratedTerminal",
+          internalConsoleOptions = "neverOpen",
+          sourceMaps = true,
+          skipFiles = { "<node_internals>/**", "**/node_modules/**" },
+        },
+      }
+
+      dap.configurations.javascript = jest_configs
+      dap.configurations.javascriptreact = jest_configs
+      dap.configurations.typescript = jest_configs
+      dap.configurations.typescriptreact = jest_configs
+
       vim.api.nvim_set_hl(0, "DapStoppedLine", { link = "Visual" })
       vim.fn.sign_define("DapStopped", {
         text = "▶",
