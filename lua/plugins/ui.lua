@@ -1,26 +1,34 @@
+-- File: lua/plugins/ui.lua
 return {
   -- messages, cmdline and the popupmenu
   {
     "folke/noice.nvim",
     opts = function(_, opts)
+      opts.routes = opts.routes or {}
+
+      -- skip noisy notification
       table.insert(opts.routes, {
-        filter = {
-          event = "notify",
-          find = "No information available",
-        },
+        filter = { event = "notify", find = "No information available" },
         opts = { skip = true },
       })
+
+      -- send notifications to OS when unfocused
+      local aug = vim.api.nvim_create_augroup("NoiceFocusRoutes", { clear = true })
       local focused = true
+
       vim.api.nvim_create_autocmd("FocusGained", {
+        group = aug,
         callback = function()
           focused = true
         end,
       })
       vim.api.nvim_create_autocmd("FocusLost", {
+        group = aug,
         callback = function()
           focused = false
         end,
       })
+
       table.insert(opts.routes, 1, {
         filter = {
           cond = function()
@@ -31,24 +39,27 @@ return {
         opts = { stop = false },
       })
 
-      opts.commands = {
-        all = {
-          -- options for the message history that you get with `:Noice`
-          view = "split",
-          opts = { enter = true, format = "details" },
-          filter = {},
-        },
+      opts.commands = opts.commands or {}
+      opts.commands.all = {
+        view = "split",
+        opts = { enter = true, format = "details" },
+        filter = {},
       }
 
       vim.api.nvim_create_autocmd("FileType", {
+        group = aug,
         pattern = "markdown",
         callback = function(event)
           vim.schedule(function()
-            require("noice.text.markdown").keys(event.buf)
+            local ok, md = pcall(require, "noice.text.markdown")
+            if ok and md and md.keys then
+              md.keys(event.buf)
+            end
           end)
         end,
       })
 
+      opts.presets = opts.presets or {}
       opts.presets.lsp_doc_border = true
     end,
   },
@@ -60,70 +71,17 @@ return {
     },
   },
 
-  -- {
-  --   "snacks.nvim",
-  --   opts = {
-  --     scroll = { enabled = false },
-  --   },
-  --   keys = {},
-  -- },
-  --
-  -- buffer line
-  -- {
-  --   "akinsho/bufferline.nvim",
-  --   event = "VeryLazy",
-  --   keys = {
-  --     { "<Tab>", "<Cmd>BufferLineCycleNext<CR>", desc = "Next tab" },
-  --     { "<S-Tab>", "<Cmd>BufferLineCyclePrev<CR>", desc = "Prev tab" },
-  --   },
-  --   opts = {
-  --     options = {
-  --       mode = "tabs",
-  --       -- separator_style = "slant",
-  --       show_buffer_close_icons = false,
-  --       show_close_icon = false,
-  --     },
-  --   },
-  -- },
-  --
-  -- filename
-  {
-    "b0o/incline.nvim",
-    dependencies = { "craftzdog/solarized-osaka.nvim" },
-    event = "BufReadPre",
-    priority = 1200,
-    config = function()
-      local color = require("solarized-osaka.colors").setup()
-      require("incline").setup({
-        highlight = {
-          groups = {
-            InclineNormal = { guibg = color.magenta500, guifg = color.base04 },
-            InclineNormalNC = { guifg = color.violet500, guibg = color.base03 },
-          },
-        },
-        window = { margin = { vertical = 0, horizontal = 1 } },
-        hide = {
-          cursorline = true,
-        },
-        render = function(props)
-          local filename = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(props.buf), ":t")
-          if vim.bo[props.buf].modified then
-            filename = "[+] " .. filename
-          end
-
-          local icon, color = require("nvim-web-devicons").get_icon_color(filename)
-          return { { icon, guifg = color }, { " " }, { filename } }
-        end,
-      })
-    end,
-  },
-
   -- statusline
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)
       local LazyVim = require("lazyvim.util")
-      opts.sections.lualine_c[4] = {
+      opts.sections = opts.sections or {}
+      opts.sections.lualine_c = opts.sections.lualine_c or {}
+
+      -- append pretty_path safely
+      table.insert(
+        opts.sections.lualine_c,
         LazyVim.lualine.pretty_path({
           length = 0,
           relative = "cwd",
@@ -132,8 +90,8 @@ return {
           filename_hl = "Bold",
           modified_sign = "",
           readonly_icon = " 󰌾 ",
-        }),
-      }
+        })
+      )
     end,
   },
 
@@ -148,28 +106,5 @@ return {
       },
     },
     keys = { { "<leader>z", "<cmd>ZenMode<cr>", desc = "Zen Mode" } },
-  },
-
-  {
-    "MeanderingProgrammer/render-markdown.nvim",
-    enabled = false,
-  },
-
-  {
-    "folke/snacks.nvim",
-    opts = {
-      dashboard = {
-        preset = {
-          header = [[
-          ███╗   ███╗ ██████╗  ██████╗ ███╗   ██╗██╗     ██╗   ██╗ ██████╗  █████╗ ███████╗
-          ████╗ ████║██╔═══██╗██╔═══██╗████╗  ██║██║     ██║   ██║██╔════╝ ██╔══██╗██╔════╝
-          ██╔████╔██║██║   ██║██║   ██║██╔██╗ ██║██║     ██║   ██║██║      ███████║███████╗
-          ██║╚██╔╝██║██║   ██║██║   ██║██║╚██╗██║██║     ██║   ██║██║      ██╔══██║╚════██║
-          ██║ ╚═╝ ██║╚██████╔╝╚██████╔╝██║ ╚████║███████╗╚██████╔╝╚██████  ██║  ██║███████║
-          ╚═╝     ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝╚══════╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝
-   ]],
-        },
-      },
-    },
   },
 }

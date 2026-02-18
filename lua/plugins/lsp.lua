@@ -1,37 +1,83 @@
+-- File: lua/plugins/lsp.lua
 return {
-  -- tools
   {
     "mason-org/mason.nvim",
     opts = function(_, opts)
+      opts.ensure_installed = opts.ensure_installed or {}
       vim.list_extend(opts.ensure_installed, {
+        -- format / lint
         "stylua",
         "selene",
         "luacheck",
         "shellcheck",
         "shfmt",
+
+        -- LSP servers
         "tailwindcss-language-server",
         "typescript-language-server",
         "css-lsp",
+        "html-lsp",
+        "yaml-language-server",
       })
     end,
   },
 
-  -- lsp servers
   {
     "neovim/nvim-lspconfig",
     opts = {
       inlay_hints = { enabled = false },
+
+      -- Diagnostics behavior (virtual text + float popup)
+      diagnostics = {
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+
+        -- keep or tweak; set to false if you want NO inline text
+        virtual_text = false,
+        virtual_lines = false,
+        -- settings for :lua vim.diagnostic.open_float(...)
+        float = {
+          border = "rounded",
+          source = "if_many",
+          header = "",
+          prefix = "",
+        },
+      },
+
       ---@type lspconfig.options
       servers = {
         cssls = {},
+        html = {},
+
+        yamlls = {
+          settings = {
+            yaml = { keyOrdering = false },
+          },
+        },
+
         tailwindcss = {
           root_dir = function(...)
-            return require("lspconfig.util").root_pattern(".git")(...)
+            local util = require("lspconfig.util")
+            return util.root_pattern(
+              "tailwind.config.js",
+              "tailwind.config.cjs",
+              "tailwind.config.mjs",
+              "tailwind.config.ts",
+              "postcss.config.js",
+              "postcss.config.cjs",
+              "postcss.config.mjs",
+              "postcss.config.ts",
+              "package.json",
+              ".git"
+            )(...)
           end,
         },
+
         tsserver = {
           root_dir = function(...)
-            return require("lspconfig.util").root_pattern(".git")(...)
+            local util = require("lspconfig.util")
+            return util.root_pattern("tsconfig.json", "jsconfig.json", "package.json", ".git")(...)
           end,
           single_file_support = false,
           settings = {
@@ -59,31 +105,13 @@ return {
             },
           },
         },
-        html = {},
-        yamlls = {
-          settings = {
-            yaml = {
-              keyOrdering = false,
-            },
-          },
-        },
+
         lua_ls = {
-          -- enabled = false,
           single_file_support = true,
           settings = {
             Lua = {
-              workspace = {
-                checkThirdParty = false,
-              },
-              completion = {
-                workspaceWord = true,
-                callSnippet = "Both",
-              },
-              misc = {
-                parameters = {
-                  -- "--log-level=trace",
-                },
-              },
+              workspace = { checkThirdParty = false },
+              completion = { workspaceWord = true, callSnippet = "Both" },
               hint = {
                 enable = true,
                 setType = false,
@@ -92,19 +120,11 @@ return {
                 semicolon = "Disable",
                 arrayIndex = "Disable",
               },
-              doc = {
-                privateName = { "^_" },
-              },
-              type = {
-                castNumberToInteger = true,
-              },
+              doc = { privateName = { "^_" } },
+              type = { castNumberToInteger = true },
               diagnostics = {
                 disable = { "incomplete-signature-doc", "trailing-space" },
-                -- enable = false,
-                groupSeverity = {
-                  strong = "Warning",
-                  strict = "Warning",
-                },
+                groupSeverity = { strong = "Warning", strict = "Warning" },
                 groupFileStatus = {
                   ["ambiguity"] = "Opened",
                   ["await"] = "Opened",
@@ -121,36 +141,51 @@ return {
                 },
                 unusedLocalExclude = { "_*" },
               },
-              format = {
-                enable = false,
-                defaultConfig = {
-                  indent_style = "space",
-                  indent_size = "2",
-                  continuation_indent_size = "2",
-                },
-              },
+              format = { enable = false },
             },
           },
         },
       },
-      setup = {},
+
+      -- Hook into LazyVim's LSP attach flow
+      setup = {
+        -- runs for all servers
+        ["*"] = function()
+          vim.opt.updatetime = 500
+
+          vim.diagnostic.config({
+            float = {
+              wrap = true,
+              max_width = 100,
+            },
+          })
+
+          local group = vim.api.nvim_create_augroup("DiagnosticFloatOnHover", { clear = true })
+          vim.api.nvim_create_autocmd("CursorHold", {
+            group = group,
+            callback = function()
+              vim.diagnostic.open_float(nil, {
+                focus = false,
+                scope = "cursor",
+              })
+            end,
+          })
+
+          vim.keymap.set("n", "<leader>ux", function()
+            local cfg = vim.diagnostic.config()
+
+            local vt_enabled = cfg.virtual_text ~= false
+            local vl_enabled = cfg.virtual_lines == true
+
+            local enable = not (vt_enabled or vl_enabled)
+
+            vim.diagnostic.config({
+              virtual_text = enable and { spacing = 2, prefix = "●" } or false,
+              virtual_lines = false, -- keep OFF unless you want to toggle it too
+            })
+          end, { desc = "Toggle inline diagnostics text" })
+        end,
+      },
     },
   },
-  -- {
-  --   "neovim/nvim-lspconfig",
-  --   opts = function()
-  --     local keys = require("lazyvim.plugins.lsp.keymaps").get()
-  --     vim.list_extend(keys, {
-  --       {
-  --         "gd",
-  --         function()
-  --           -- DO NOT RESUSE WINDOW
-  --           require("telescope.builtin").lsp_definitions({ reuse_win = false })
-  --         end,
-  --         desc = "Goto Definition",
-  --         has = "definition",
-  --       },
-  --     })
-  --   end,
-  -- },
 }
