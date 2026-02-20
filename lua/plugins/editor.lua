@@ -70,7 +70,8 @@ return {
           else
             -- Normal mode: prefill with word under cursor
             builtin.current_buffer_fuzzy_find({
-              default_text = vim.fn.expand("<cword>"),
+              -- removing word under the cursor selector in normal mode
+              -- default_text = vim.fn.expand("<cword>"),
               previewer = true,
               initial_mode = "insert",
               sorting_strategy = "ascending",
@@ -139,9 +140,10 @@ return {
             })
           else
             -- Normal mode -> word under cursor
-            local word = vim.fn.expand("<cword>")
+            -- Removing word under cursor
+            -- local word = vim.fn.expand("<cword>")
             builtin.live_grep({
-              default_text = word,
+              -- default_text = word,
               additional_args = function()
                 return rg_args()
               end,

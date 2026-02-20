@@ -44,8 +44,6 @@ return {
       })
     end,
   },
-
-  -- copilot
   {
     "zbirenbaum/copilot.lua",
     event = "InsertEnter",
@@ -56,9 +54,9 @@ return {
           accept = "<C-l>",
           accept_word = "<M-l>",
           accept_line = "<M-S-l>",
-          next = "<M-]>",
-          prev = "<M-[>",
-          dismiss = "<C-]>",
+          next = "<C-]>",
+          prev = "<C-[>",
+          dismiss = "<C-;>",
         },
       },
       filetypes = {
@@ -66,6 +64,22 @@ return {
         help = true,
         ["dap-repl"] = false,
         ["TelescopePrompt"] = false,
+      },
+    },
+    keys = {
+      {
+        "<leader>ap",
+        function()
+          local suggestion = require("copilot.suggestion")
+          suggestion.toggle_auto_trigger()
+
+          if suggestion.is_auto_trigger_enabled() then
+            vim.notify("Copilot Enabled", vim.log.levels.INFO)
+          else
+            vim.notify("Copilot Disabled", vim.log.levels.WARN)
+          end
+        end,
+        desc = "Toggle Copilot",
       },
     },
   },
