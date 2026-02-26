@@ -1,63 +1,98 @@
--- File: lua/config/options.lua
--- Options are automatically loaded before lazy.nvim startup
--- Default options that are always set:
--- https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/options.lua
--- Add any additional options here
-
+-- =====================================================
+-- Leader
+-- =====================================================
 vim.g.mapleader = " "
 
+-- =====================================================
 -- Encoding
+-- =====================================================
 vim.opt.encoding = "utf-8"
 vim.opt.fileencoding = "utf-8"
 
+-- =====================================================
 -- UI
+-- =====================================================
 vim.opt.number = true
 vim.opt.title = true
 vim.opt.laststatus = 3
 vim.opt.scrolloff = 10
 vim.opt.wrap = false
+vim.opt.linebreak = true
 vim.opt.mouse = ""
 
--- Command line height (modern UI)
--- Neovim supports cmdheight=0 on modern versions; works well with noice.nvim.
+-- Modern command line (works great with noice.nvim)
 vim.opt.cmdheight = 0
 
--- Indentation
+-- =====================================================
+-- Indentation (VSCode / IntelliJ feel)
+-- =====================================================
 vim.opt.expandtab = true
 vim.opt.shiftwidth = 2
 vim.opt.tabstop = 2
-vim.opt.smartindent = true
+vim.opt.softtabstop = 2
+
 vim.opt.autoindent = true
+vim.opt.smartindent = false -- disable legacy heuristic
+vim.opt.cindent = false -- avoid C-style indent rules
+vim.opt.copyindent = true
+vim.opt.preserveindent = true
+vim.opt.shiftround = true
 vim.opt.smarttab = true
 vim.opt.breakindent = true
+
 vim.opt.backspace = { "start", "eol", "indent" }
 
+-- =====================================================
 -- Search
+-- =====================================================
 vim.opt.hlsearch = true
 vim.opt.ignorecase = true
-vim.opt.smartcase = true -- IMPORTANT: makes searches case-sensitive if you type capitals
+vim.opt.smartcase = true
 
+-- =====================================================
 -- Splits
+-- =====================================================
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.splitkeep = "cursor"
 
--- Files / wildmenu
+-- =====================================================
+-- Files / Wildmenu
+-- =====================================================
 vim.opt.backup = false
 vim.opt.backupskip = { "/tmp/*", "/private/tmp/*" }
-vim.opt.path:append({ "**" })
-vim.opt.wildignore:append({ "*/node_modules/*" })
 
--- Preview substitutions live
+vim.opt.path:append({ "**" })
+vim.opt.wildignore:append({
+  "*/node_modules/*",
+  "*/dist/*",
+  "*/.git/*",
+})
+
+-- =====================================================
+-- Live substitution preview
+-- =====================================================
 vim.opt.inccommand = "split"
 
--- Comments: continue comments on Enter (and optionally o/O)
-vim.opt.formatoptions:append({ "r", "o" })
+-- =====================================================
+-- Comment behavior (VSCode-like Enter)
+-- =====================================================
+vim.opt.formatoptions:remove({ "o" }) -- don't auto continue comments
+vim.opt.formatoptions:append({ "r" })
 
+-- =====================================================
+-- Clipboard (system copy/paste)
+-- =====================================================
+vim.opt.clipboard = "unnamedplus"
+
+-- =====================================================
 -- Shell
+-- =====================================================
 vim.opt.shell = "fish"
 
--- File types (prefer this over autocmd setf)
+-- =====================================================
+-- Filetype additions
+-- =====================================================
 vim.filetype.add({
   extension = {
     mdx = "mdx",
@@ -68,16 +103,26 @@ vim.filetype.add({
   },
 })
 
+-- =====================================================
 -- LazyVim switches
+-- =====================================================
 vim.g.lazyvim_prettier_needs_config = true
 vim.g.lazyvim_picker = "telescope"
 vim.g.lazyvim_cmp = "blink.cmp"
 
-vim.opt.showcmd = false
-vim.opt.timeoutlen = 500
+-- =====================================================
+-- Timing / responsiveness
+-- =====================================================
 vim.opt.timeout = true
+vim.opt.timeoutlen = 400
+vim.opt.updatetime = 200
 
--- Optional: undercurl tweaks (legacy). Keep only if you KNOW you need it.
--- If you keep it, scope it to terminals that support it.
--- vim.cmd([[let &t_Cs = "\e[4:3m"]])
--- vim.cmd([[let &t_Ce = "\e[4:0m"]])
+vim.opt.showcmd = false
+
+-- =====================================================
+-- Better editing UX
+-- =====================================================
+vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+-- Keep cursor position when reopening files
+vim.opt.viewoptions = { "cursor", "folds" }

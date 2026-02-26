@@ -18,6 +18,14 @@ keymap.set({ "n", "v" }, "<Leader>R", '"_C', { desc = "Change to end of line (no
 keymap.set("n", "+", "<C-a>", { desc = "Increment number" })
 keymap.set("n", "-", "<C-x>", { desc = "Decrement number" })
 
+-- -- Move line up/down in normal mode
+keymap.set("n", "<A-j>", ":m .+1<CR>==", { desc = "Move line down" })
+keymap.set("n", "<A-k>", ":m .-2<CR>==", { desc = "Move line up" })
+
+-- Move selection in visual mode
+keymap.set("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+keymap.set("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+
 -- Keep native dw. Put "delete previous word (no yank)" under leader.
 keymap.set("n", "<leader>dw", 'vb"_d', { desc = "Delete previous word (no yank)" })
 
@@ -65,3 +73,14 @@ end, { desc = "Toggle inlay hints" })
 vim.api.nvim_create_user_command("ToggleAutoformat", function()
   require("moonlucas.lsp").toggleAutoformat()
 end, {})
+
+keymap.set("n", "<leader>dt", function()
+  local date = os.date("%Y-%m-%d %H:%M")
+  vim.api.nvim_put({ "## " .. date, "" }, "l", true, true)
+end, { desc = "Insert Date Heading" })
+
+-- Scratch: new (timestamped) in Markdown
+vim.keymap.set("n", "<leader>xn", function()
+  local name = "scratch_" .. os.date("%Y%m%d_%H%M%S")
+  Snacks.scratch({ name = name, ft = "markdown" })
+end, { desc = "New Scratch (timestamped)" })
