@@ -13,6 +13,8 @@ return {
       table.insert(opts.spec, { ";", group = "Search" })
       table.insert(opts.spec, { "<leader>a", group = "AI" })
       table.insert(opts.spec, { "<leader>d", group = "Debug" })
+      table.insert(opts.spec, { "<leader>dt", group = "Debug: Test" })
+      table.insert(opts.spec, { "<leader>i", group = "Insert / Toggle" })
 
       return opts
     end,

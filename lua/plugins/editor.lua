@@ -9,7 +9,23 @@ return {
       },
     },
 
-    keys = {
+    keys = (function()
+      local function get_visual_selection()
+        local bufnr = 0
+        local start = vim.api.nvim_buf_get_mark(bufnr, "<")
+        local finish = vim.api.nvim_buf_get_mark(bufnr, ">")
+        local srow, scol = start[1] - 1, start[2]
+        local erow, ecol = finish[1] - 1, finish[2]
+        if srow > erow or (srow == erow and scol > ecol) then
+          srow, erow = erow, srow
+          scol, ecol = ecol, scol
+        end
+        local lines = vim.api.nvim_buf_get_text(bufnr, srow, scol, erow, ecol + 1, {})
+        local text = table.concat(lines, "\n")
+        return text:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
+      end
+
+      return {
       -- Find plugin files
       {
         "<leader>fP",
@@ -40,22 +56,7 @@ return {
 
           local mode = vim.fn.mode()
           if mode:match("[vV\22]") then
-            -- Use visual selection as initial query
-            local bufnr = 0
-            local start = vim.api.nvim_buf_get_mark(bufnr, "<")
-            local finish = vim.api.nvim_buf_get_mark(bufnr, ">")
-
-            local srow, scol = start[1] - 1, start[2]
-            local erow, ecol = finish[1] - 1, finish[2]
-            if srow > erow or (srow == erow and scol > ecol) then
-              srow, erow = erow, srow
-              scol, ecol = ecol, scol
-            end
-
-            local lines = vim.api.nvim_buf_get_text(bufnr, srow, scol, erow, ecol + 1, {})
-            local selection =
-              table.concat(lines, "\n"):gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
-
+            local selection = get_visual_selection()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 
             builtin.current_buffer_fuzzy_find({
@@ -109,25 +110,6 @@ return {
 
           local mode = vim.fn.mode()
           if mode:match("[vV\22]") then
-            -- Visual selection -> default_text
-            local function get_visual_selection()
-              local bufnr = 0
-              local start = vim.api.nvim_buf_get_mark(bufnr, "<")
-              local finish = vim.api.nvim_buf_get_mark(bufnr, ">")
-
-              local srow, scol = start[1] - 1, start[2]
-              local erow, ecol = finish[1] - 1, finish[2]
-
-              if srow > erow or (srow == erow and scol > ecol) then
-                srow, erow = erow, srow
-                scol, ecol = ecol, scol
-              end
-
-              local lines = vim.api.nvim_buf_get_text(bufnr, srow, scol, erow, ecol + 1, {})
-              local text = table.concat(lines, "\n")
-              return text:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
-            end
-
             local selection = get_visual_selection()
             vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
 
@@ -212,20 +194,28 @@ return {
         end,
         desc = "Diagnostics (current buffer)",
       },
-      -- Symbols: Treesitter if available, else LSP symbols
+      -- LSP document symbols
       {
         ";s",
         function()
-          local builtin = require("telescope.builtin")
-          if builtin.treesitter then
-            builtin.treesitter()
-          else
-            builtin.lsp_document_symbols({ symbol_width = 50, show_line = false })
-          end
+          require("telescope.builtin").lsp_document_symbols({
+            symbol_width = 50,
+            show_line = true,
+          })
         end,
-        desc = "Symbols (Treesitter / LSP fallback)",
+        desc = "Symbols (LSP)",
       },
-    },
+
+      -- Git-tracked files (fast project navigation)
+      {
+        ";g",
+        function()
+          require("telescope.builtin").git_files({ show_untracked = true })
+        end,
+        desc = "Git files",
+      },
+      }
+    end)(),
 
     config = function(_, opts)
       local telescope = require("telescope")

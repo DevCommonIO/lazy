@@ -30,7 +30,7 @@ return {
 
         map("n", "<leader>gp", gs.preview_hunk, "Preview hunk")
         map("n", "<leader>gb", gs.toggle_current_line_blame, "Toggle line blame")
-        map("n", "<leader>gq", "<C-w>o", "Close Diff/ keep only this window")
+        map("n", "<leader>gq", "<cmd>diffoff | close<CR>", "Close diff window")
 
         -- Optional: quick diff
         map("n", "<leader>gd", gs.diffthis, "Diff this")

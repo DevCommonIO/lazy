@@ -11,9 +11,13 @@ return {
       opts.keymap["<CR>"] = { "accept", "fallback" }
 
       -- Snippet placeholder navigation (no Tab conflicts)
-      opts.keymap["<C-j>"] = { "snippet_backward", "fallback" }
-      opts.keymap["<C-k>"] = { "snippet_forward", "fallback" }
-      opts.keymap["<C-e>"] = { "cancel", "hide", "fallback" }
+      opts.keymap["<C-j>"] = { "snippet_forward", "fallback" }
+      opts.keymap["<C-k>"] = { "snippet_backward", "fallback" }
+      opts.keymap["<C-e>"] = { "cancel", "fallback" }
+
+      -- Scroll docs in completion popup
+      opts.keymap["<C-f>"] = { "scroll_documentation_down", "fallback" }
+      opts.keymap["<C-b>"] = { "scroll_documentation_up", "fallback" }
 
       -- Auto-show menu
       opts.completion = opts.completion or {}
