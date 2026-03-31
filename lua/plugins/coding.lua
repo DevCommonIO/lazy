@@ -1,4 +1,14 @@
 return {
+  -- Split/join code blocks (objects, arrays, function args, etc.)
+  {
+    "Wansmer/treesj",
+    keys = {
+      { "<leader>m", "<cmd>TSJToggle<cr>", desc = "Toggle split/join block" },
+    },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    config = true,
+  },
+
   -- Incremental rename
   {
     "smjonas/inc-rename.nvim",

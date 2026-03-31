@@ -58,6 +58,8 @@ keymap.set("t", "<C-h>", [[<C-\><C-n><C-w>h]], { desc = "Focus left window" })
 keymap.set("t", "<C-j>", [[<C-\><C-n><C-w>j]], { desc = "Focus lower window" })
 keymap.set("t", "<C-k>", [[<C-\><C-n><C-w>k]], { desc = "Focus upper window" })
 keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]], { desc = "Focus right window" })
+-- Enter normal mode inside terminal (to scroll/visual/yank), then i/a to return
+keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { desc = "Terminal → normal mode" })
 
 -- Resize window
 keymap.set("n", "<M-left>", "<C-w><", { desc = "Resize window left" })
