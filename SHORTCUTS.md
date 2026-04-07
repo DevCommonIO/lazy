@@ -1,4 +1,4 @@
-# Neovim Shortcuts Reference
+#jk Neovim Shortcuts Reference
 
 > Leader = `Space`
 
@@ -157,13 +157,11 @@
 | `jk` | insert | Exit insert mode |
 | `x` | normal | Delete char (no yank) |
 | `<leader>p` / `<leader>P` | n/v | Paste last yanked text after / before |
-| `<leader>r` | n/v | Change (no yank) |
-| `<leader>R` | n/v | Change to end of line (no yank) |
 | `<leader>dw` | normal | Delete word under cursor (no yank) |
 | `<leader>A` | normal | Select all |
 | `<leader>o` / `<leader>O` | normal | New line below / above (no comment continuation) |
 | `+` / `-` | normal | Increment / decrement number |
-| `<A-j>` / `<A-k>` | n/v | Move line or selection down / up |
+| `<A-J>` / `<A-K>` | n/v | Move line or selection down / up |
 | `<C-m>` | normal | Jump forward (jumplist) |
 | `<leader>id` | normal | Insert date heading (`## YYYY-MM-DD HH:MM`) |
 | `<leader>xn` | normal | New timestamped scratch buffer (markdown) |
@@ -245,8 +243,8 @@
 | Key | Mode | Description |
 |-----|------|-------------|
 | `<C-l>` | insert | Accept suggestion |
-| `<M-l>` | insert | Accept next word |
-| `<M-S-l>` | insert | Accept full line |
+| `<C-Right>` | insert | Accept next word |
+| `<C-Down>` | insert | Accept full line |
 | `<C-]>` / `<C-[>` | insert | Next / prev suggestion |
 | `<C-;>` | insert | Dismiss suggestion |
 | `<leader>ap` | normal | Toggle Copilot auto-trigger |
@@ -280,8 +278,10 @@
 | `<leader>aC` | normal | Continue last session |
 | `<leader>ab` | normal | Add current buffer to context |
 | `<leader>as` | visual | Send selection to Claude |
-| `<leader>aa` | normal | Accept diff |
+| `<leader>aa` | normal | Accept diff & return to Claude terminal |
 | `<leader>ad` | normal | Deny diff |
+| `<leader>ah` | normal | Move Claude terminal to bottom (horizontal) |
+| `<leader>av` | normal | Move Claude terminal to right (vertical) |
 
 ---
 
@@ -329,8 +329,17 @@
 | Key | Mode | Description |
 |-----|------|-------------|
 | `<leader>m` | normal | Toggle split / join block (treesj) |
-| `<C-a>` / `<C-x>` | normal | Increment / decrement (dial.nvim — booleans, hex, semver, let↔const) |
+| `<C-a>` / `<C-x>` | n/v | Increment / decrement (booleans, hex, semver, let↔const) |
 | `[n` / `]n` | normal | Prev / next treesitter node (mini.bracketed) |
 | `<leader>i` | normal | Toggle inlay hints |
 | `<leader>ux` | normal | Toggle inline diagnostics |
 | `<leader>z` | normal | Zen mode |
+
+### Refactoring (refactoring.nvim)
+
+| Key | Mode | Description |
+|-----|------|-------------|
+| `<leader>re` | n/v | Open refactor picker |
+| `<leader>rf` | visual | Extract selection to function |
+| `<leader>rv` | visual | Extract selection to variable |
+| `<leader>ri` | n/v | Inline variable |

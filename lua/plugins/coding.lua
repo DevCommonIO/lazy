@@ -25,13 +25,15 @@ return {
     end,
   },
 
-  -- Better increase/descrease
+  -- Better increase/decrease — normal + visual mode
   {
     "monaqa/dial.nvim",
     -- stylua: ignore
     keys = {
       { "<C-a>", function() return require("dial.map").inc_normal() end, expr = true, desc = "Increment" },
       { "<C-x>", function() return require("dial.map").dec_normal() end, expr = true, desc = "Decrement" },
+      { "<C-a>", function() return require("dial.map").inc_visual() end, mode = "v", expr = true, desc = "Increment" },
+      { "<C-x>", function() return require("dial.map").dec_visual() end, mode = "v", expr = true, desc = "Decrement" },
     },
     config = function()
       local augend = require("dial.augend")
@@ -47,6 +49,22 @@ return {
       })
     end,
   },
+
+  -- Extract function/variable refactors (VSCode-like refactor menu)
+  -- Visual select code → <leader>re to pick refactor, or direct shortcuts below
+  {
+    "ThePrimeagen/refactoring.nvim",
+    dependencies = { "nvim-lua/plenary.nvim", "nvim-treesitter/nvim-treesitter" },
+    keys = {
+      { "<leader>re", function() require("refactoring").select_refactor() end, mode = { "n", "x" }, desc = "Refactor" },
+      { "<leader>rf", function() require("refactoring").refactor("Extract Function") end, mode = "x", desc = "Extract Function" },
+      { "<leader>rv", function() require("refactoring").refactor("Extract Variable") end, mode = "x", desc = "Extract Variable" },
+      { "<leader>ri", function() require("refactoring").refactor("Inline Variable") end, mode = { "n", "x" }, desc = "Inline Variable" },
+    },
+    config = true,
+  },
+
+  -- Copilot
   {
     "zbirenbaum/copilot.lua",
     event = "InsertEnter",
@@ -54,18 +72,18 @@ return {
       suggestion = {
         auto_trigger = true,
         keymap = {
-          accept = "<C-l>",
-          accept_word = "<M-l>",
-          accept_line = "<M-S-l>",
-          next = "<C-]>",
-          prev = "<C-[>",
-          dismiss = "<C-;>",
+          accept      = "<C-l>",
+          accept_word = "<C-Right>",
+          accept_line = "<C-Down>",
+          next        = "<C-]>",
+          prev        = "<C-[>",
+          dismiss     = "<C-;>",
         },
       },
       filetypes = {
         markdown = true,
-        help = true,
-        ["dap-repl"] = false,
+        help     = true,
+        ["dap-repl"]        = false,
         ["TelescopePrompt"] = false,
       },
     },
@@ -75,12 +93,10 @@ return {
         function()
           local suggestion = require("copilot.suggestion")
           suggestion.toggle_auto_trigger()
-
-          if suggestion.is_auto_trigger_enabled() then
-            vim.notify("Copilot Enabled", vim.log.levels.INFO)
-          else
-            vim.notify("Copilot Disabled", vim.log.levels.WARN)
-          end
+          vim.notify(
+            suggestion.is_auto_trigger_enabled() and "Copilot Enabled" or "Copilot Disabled",
+            suggestion.is_auto_trigger_enabled() and vim.log.levels.INFO or vim.log.levels.WARN
+          )
         end,
         desc = "Toggle Copilot",
       },

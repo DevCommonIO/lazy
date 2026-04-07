@@ -29,6 +29,18 @@ return {
       opts.completion.list.selection = opts.completion.list.selection or {}
       opts.completion.list.selection.preselect = false
 
+      -- Auto-show docs popup (like VSCode IntelliSense side panel)
+      opts.completion.documentation = opts.completion.documentation or {}
+      opts.completion.documentation.auto_show = true
+      opts.completion.documentation.auto_show_delay_ms = 200
+      opts.completion.documentation.window = { border = "rounded" }
+
+      -- Signature help while typing function args (VSCode: see param name/type on each arg)
+      opts.signature = {
+        enabled = true,
+        window = { border = "rounded", scrollbar = false },
+      }
+
       return opts
     end,
   },

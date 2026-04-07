@@ -10,9 +10,8 @@ keymap.set("n", "<Leader>P", '"0P', { desc = "Paste last yanked text before" })
 keymap.set("v", "<Leader>p", '"0p', { desc = "Paste last yanked text" })
 
 -- NOTE: <leader>d / <leader>D removed — operator maps blocked the entire <leader>d* debug namespace.
--- Use "_d{motion} / "_D natively for blackhole deletes.
-keymap.set({ "n", "v" }, "<Leader>r", '"_c', { desc = "Change (no yank)" })
-keymap.set({ "n", "v" }, "<Leader>R", '"_C', { desc = "Change to end of line (no yank)" })
+-- NOTE: <leader>r / <leader>R removed — conflicts with refactoring.nvim (<leader>re/rf/rv/ri).
+-- Use "_c{motion} / "_C natively for change-without-yank.
 
 -- Increment/decrement (dial already gives <C-a>/<C-x> via expr mapping if you want)
 keymap.set("n", "+", "<C-a>", { desc = "Increment number" })
