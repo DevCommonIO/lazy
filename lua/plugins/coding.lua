@@ -9,13 +9,6 @@ return {
     config = true,
   },
 
-  -- Incremental rename
-  {
-    "smjonas/inc-rename.nvim",
-    cmd = "IncRename",
-    config = true,
-  },
-
   -- Go forward/backward with square brackets
   {
     "nvim-mini/mini.bracketed",
