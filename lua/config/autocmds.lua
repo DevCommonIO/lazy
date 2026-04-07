@@ -7,6 +7,30 @@
 -- Or remove existing autocmds by their group name (which is prefixed with `lazyvim_` for the defaults)
 -- e.g. vim.api.nvim_del_augroup_by_name("lazyvim_wrap_spell")
 
+-- -- Diff highlight colors — readable on solarized-osaka dark + transparent bg
+-- local function apply_diff_highlights()
+--   vim.api.nvim_set_hl(0, "DiffAdd",    { bg = "#1e3a28", fg = "#87af87" })
+--   vim.api.nvim_set_hl(0, "DiffDelete", { bg = "#3a1e1e", fg = "#af8787" })
+--   vim.api.nvim_set_hl(0, "DiffChange", { bg = "#1e2a3a" })
+--   vim.api.nvim_set_hl(0, "DiffText",   { bg = "#3a3000", fg = "#d7af5f", bold = true })
+-- end
+-- -- Re-apply after every colorscheme load (solarized-osaka resets these on load)
+-- vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", callback = apply_diff_highlights })
+-- -- Also schedule for after the initial colorscheme finishes (VeryLazy fires mid-load)
+-- vim.schedule(apply_diff_highlights)
+--
+-- -- Cleaner diff windows: hide sign/fold columns, disable wrap
+-- vim.api.nvim_create_autocmd("OptionSet", {
+--   pattern = "diff",
+--   callback = function()
+--     if vim.v.option_new == "1" then
+--       vim.opt_local.foldcolumn = "0"
+--       vim.opt_local.signcolumn = "no"
+--       vim.opt_local.wrap       = false
+--     end
+--   end,
+-- })
+--
 -- Turn off paste mode when leaving insert
 vim.api.nvim_create_autocmd("InsertLeave", {
   pattern = "*",

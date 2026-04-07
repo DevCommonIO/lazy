@@ -18,13 +18,13 @@ keymap.set({ "n", "v" }, "<Leader>R", '"_C', { desc = "Change to end of line (no
 keymap.set("n", "+", "<C-a>", { desc = "Increment number" })
 keymap.set("n", "-", "<C-x>", { desc = "Decrement number" })
 
--- -- Move line up/down in normal mode
-keymap.set("n", "<A-j>", "<cmd>m .+1<CR>==", { desc = "Move line down" })
-keymap.set("n", "<A-k>", "<cmd>m .-2<CR>==", { desc = "Move line up" })
+-- Move line up/down in normal mode (uppercase avoids tmux M-j/M-k conflict)
+keymap.set("n", "<A-J>", "<cmd>m .+1<CR>==", { desc = "Move line down" })
+keymap.set("n", "<A-K>", "<cmd>m .-2<CR>==", { desc = "Move line up" })
 
 -- Move selection in visual mode
-keymap.set("v", "<A-j>", "<cmd>m '>+1<CR>gv=gv", { desc = "Move selection down" })
-keymap.set("v", "<A-k>", "<cmd>m '<-2<CR>gv=gv", { desc = "Move selection up" })
+keymap.set("v", "<A-J>", "<cmd>m '>+1<CR>gv=gv", { desc = "Move selection down" })
+keymap.set("v", "<A-K>", "<cmd>m '<-2<CR>gv=gv", { desc = "Move selection up" })
 
 -- Keep native dw. Put "delete word under cursor (no yank)" under leader.
 keymap.set("n", "<leader>dw", '"_daw', { desc = "Delete word under cursor (no yank)" })

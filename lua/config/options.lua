@@ -120,6 +120,14 @@ vim.opt.updatetime = 200
 vim.opt.showcmd = false
 
 -- =====================================================
+-- Diff algorithm
+-- =====================================================
+vim.opt.diffopt:append("algorithm:histogram") -- smarter than Myers (fewer spurious hunks)
+vim.opt.diffopt:append("indent-heuristic")    -- place hunks at natural code boundaries
+vim.opt.diffopt:append("linematch:60")        -- match similar lines across hunks
+vim.opt.diffopt:append("context:5")           -- show 5 lines of context around changes
+
+-- =====================================================
 -- Better editing UX
 -- =====================================================
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
