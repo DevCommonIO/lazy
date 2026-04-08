@@ -3,6 +3,10 @@ return {
   -- messages, cmdline and the popupmenu
   {
     "folke/noice.nvim",
+    keys = {
+      -- Override default <leader>n (floating picker) with a real buffer you can yank from
+      { "<leader>n", "<cmd>Noice all<cr>", desc = "Notification history (yank-able)" },
+    },
     opts = function(_, opts)
       opts.routes = opts.routes or {}
 

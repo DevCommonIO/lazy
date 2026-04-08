@@ -201,21 +201,11 @@ return {
         end,
         desc = "Diagnostics (workspace)",
       },
-      -- Diagnostics (current buffer)
+      -- Diagnostics (current buffer) — opens in Trouble so you can yank messages
       {
         ";x",
         function()
-          require("telescope.builtin").diagnostics({
-            bufnr = 0, -- current buffer only
-            theme = "ivy", -- same look as ;r / ;b
-            initial_mode = "insert", -- type immediately
-            sorting_strategy = "ascending",
-            layout_config = {
-              prompt_position = "top",
-              preview_cutoff = 0, -- always show preview
-            },
-            previewer = true, -- 🔑 enables the right-side preview
-          })
+          require("trouble").toggle({ mode = "diagnostics", filter = { buf = 0 } })
         end,
         desc = "Diagnostics (current buffer)",
       },

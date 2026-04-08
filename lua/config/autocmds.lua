@@ -31,6 +31,15 @@
 --   end,
 -- })
 --
+-- Search highlights: all matches in yellow, active match in red, typing match in orange
+local function apply_search_highlights()
+  vim.api.nvim_set_hl(0, "Search",    { bg = "#b58900", fg = "#002b36" })           -- all matches
+  vim.api.nvim_set_hl(0, "CurSearch", { bg = "#dc322f", fg = "#fdf6e3", bold = true }) -- cursor match
+  vim.api.nvim_set_hl(0, "IncSearch", { bg = "#cb4b16", fg = "#fdf6e3", bold = true }) -- while typing
+end
+vim.api.nvim_create_autocmd("ColorScheme", { pattern = "*", callback = apply_search_highlights })
+vim.schedule(apply_search_highlights)
+
 -- Turn off paste mode when leaving insert
 vim.api.nvim_create_autocmd("InsertLeave", {
   pattern = "*",

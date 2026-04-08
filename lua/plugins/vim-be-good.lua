@@ -3,8 +3,6 @@ return {
     "ThePrimeagen/vim-be-good",
     cmd = "VimBeGood",
     keys = {
-      { "<leader>T", group = "training" },
-
       { "<leader>Tv", "<cmd>VimBeGood<cr>", desc = "VimBeGood" },
 
       -- Optional quick training modes
