@@ -74,58 +74,22 @@ return {
           end,
         },
 
-        ts_ls = {
-          root_dir = function(...)
-            local util = require("lspconfig.util")
-            return util.root_pattern("tsconfig.json", "jsconfig.json", "package.json", ".git")(...)
-          end,
-          single_file_support = false,
-          on_attach = function(_, bufnr)
-            -- Add missing imports
-            vim.keymap.set("n", "<leader>ci", function()
-              vim.lsp.buf.code_action({
-                apply = true,
-                context = { only = { "source.addMissingImports.ts" }, diagnostics = {} },
-              })
-            end, { buffer = bufnr, desc = "Add missing imports (TS)" })
-
-            -- Organize / sort imports
-            vim.keymap.set("n", "<leader>co", function()
-              vim.lsp.buf.code_action({
-                apply = true,
-                context = { only = { "source.organizeImports.ts" }, diagnostics = {} },
-              })
-            end, { buffer = bufnr, desc = "Organize imports (TS)" })
-
-            -- Remove unused imports
-            vim.keymap.set("n", "<leader>cu", function()
-              vim.lsp.buf.code_action({
-                apply = true,
-                context = { only = { "source.removeUnused.ts" }, diagnostics = {} },
-              })
-            end, { buffer = bufnr, desc = "Remove unused imports (TS)" })
-          end,
+        vtsls = {
+          keys = {
+            { "<leader>ci", LazyVim.lsp.action["source.addMissingImports.ts"], desc = "Add missing imports (TS)" },
+            { "<leader>co", LazyVim.lsp.action["source.organizeImports.ts"],   desc = "Organize imports (TS)" },
+            { "<leader>cu", LazyVim.lsp.action["source.removeUnused.ts"],       desc = "Remove unused imports (TS)" },
+          },
           settings = {
             typescript = {
+              updateImportsOnFileMove = { enabled = "always" },
               inlayHints = {
-                includeInlayParameterNameHints = "literal",
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = false,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-            javascript = {
-              inlayHints = {
-                includeInlayParameterNameHints = "all",
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
+                enumMemberValues = { enabled = true },
+                functionLikeReturnTypes = { enabled = true },
+                parameterNames = { enabled = "literals" },
+                parameterTypes = { enabled = true },
+                propertyDeclarationTypes = { enabled = true },
+                variableTypes = { enabled = false },
               },
             },
           },
@@ -174,6 +138,15 @@ return {
 
       -- Hook into LazyVim's LSP attach flow
       setup = {
+        -- Register missing vtsls client command handler to suppress the warning
+        -- vtsls sends _typescript.didOrganizeImports after organizing imports,
+        -- but Neovim has no built-in handler for it.
+        vtsls = function(_, opts)
+          LazyVim.lsp.on_attach(function(client)
+            client.commands["_typescript.didOrganizeImports"] = function() end
+          end, "vtsls")
+        end,
+
         -- ESLint: fix all auto-fixable issues (includes simple-import-sort)
         eslint = function(_, opts)
           opts.on_attach = function(_, bufnr)

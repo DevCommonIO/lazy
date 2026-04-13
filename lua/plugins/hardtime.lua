@@ -24,10 +24,10 @@ return {
         ["+"] = { "n", "x" },
         ["gj"] = { "n", "x" },
         ["gk"] = { "n", "x" },
-        ["<Up>"] = { "n", "x", "i" },
-        ["<Down>"] = { "n", "x", "i" },
-        ["<Left>"] = { "n", "x", "i" },
-        ["<Right>"] = { "n", "x", "i" },
+        ["<Up>"] = { "n", "x" },
+        ["<Down>"] = { "n", "x" },
+        ["<Left>"] = { "n", "x" },
+        ["<Right>"] = { "n", "x" },
       },
       -- Patterns that trigger a hint with a suggested alternative
       hints = {
