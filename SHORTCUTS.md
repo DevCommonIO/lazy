@@ -1,4 +1,4 @@
-#jk Neovim Shortcuts Reference
+# jk Neovim Shortcuts Reference
 
 > Leader = `Space`
 
@@ -93,6 +93,7 @@
 | Key | Description |
 |-----|-------------|
 | `I` / `A` | Insert at line start / end |
+| `i` / `a` | Insert before cursor / after |
 | `o` / `O` | New line below / above and insert |
 | `gi` | Re-enter insert at last position |
 | `<C-w>` | Delete word backward |
@@ -343,3 +344,4 @@
 | `<leader>rf` | visual | Extract selection to function |
 | `<leader>rv` | visual | Extract selection to variable |
 | `<leader>ri` | n/v | Inline variable |
+

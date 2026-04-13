@@ -74,12 +74,37 @@ return {
           end,
         },
 
-        tsserver = {
+        ts_ls = {
           root_dir = function(...)
             local util = require("lspconfig.util")
             return util.root_pattern("tsconfig.json", "jsconfig.json", "package.json", ".git")(...)
           end,
           single_file_support = false,
+          on_attach = function(_, bufnr)
+            -- Add missing imports
+            vim.keymap.set("n", "<leader>ci", function()
+              vim.lsp.buf.code_action({
+                apply = true,
+                context = { only = { "source.addMissingImports.ts" }, diagnostics = {} },
+              })
+            end, { buffer = bufnr, desc = "Add missing imports (TS)" })
+
+            -- Organize / sort imports
+            vim.keymap.set("n", "<leader>co", function()
+              vim.lsp.buf.code_action({
+                apply = true,
+                context = { only = { "source.organizeImports.ts" }, diagnostics = {} },
+              })
+            end, { buffer = bufnr, desc = "Organize imports (TS)" })
+
+            -- Remove unused imports
+            vim.keymap.set("n", "<leader>cu", function()
+              vim.lsp.buf.code_action({
+                apply = true,
+                context = { only = { "source.removeUnused.ts" }, diagnostics = {} },
+              })
+            end, { buffer = bufnr, desc = "Remove unused imports (TS)" })
+          end,
           settings = {
             typescript = {
               inlayHints = {
@@ -149,6 +174,14 @@ return {
 
       -- Hook into LazyVim's LSP attach flow
       setup = {
+        -- ESLint: fix all auto-fixable issues (includes simple-import-sort)
+        eslint = function(_, opts)
+          opts.on_attach = function(_, bufnr)
+            vim.keymap.set("n", "<leader>ci", "<cmd>LspEslintFixAll<cr>",
+              { buffer = bufnr, desc = "Fix imports (ESLint autofix)" })
+          end
+        end,
+
         -- runs for all servers
         ["*"] = function()
           vim.opt.updatetime = 500
