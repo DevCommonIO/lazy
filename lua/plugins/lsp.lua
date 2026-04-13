@@ -142,9 +142,9 @@ return {
         -- vtsls sends _typescript.didOrganizeImports after organizing imports,
         -- but Neovim has no built-in handler for it.
         vtsls = function(_, opts)
-          LazyVim.lsp.on_attach(function(client)
+          Snacks.util.lsp.on({ name = "vtsls" }, function(_, client)
             client.commands["_typescript.didOrganizeImports"] = function() end
-          end, "vtsls")
+          end)
         end,
 
         -- ESLint: fix all auto-fixable issues (includes simple-import-sort)
