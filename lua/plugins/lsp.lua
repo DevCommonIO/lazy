@@ -14,7 +14,6 @@ return {
 
         -- LSP servers
         "tailwindcss-language-server",
-        "typescript-language-server",
         "css-lsp",
         "html-lsp",
         "yaml-language-server",
@@ -77,7 +76,6 @@ return {
         vtsls = {
           keys = {
             { "<leader>ci", LazyVim.lsp.action["source.addMissingImports.ts"], desc = "Add missing imports (TS)" },
-            { "<leader>co", LazyVim.lsp.action["source.organizeImports.ts"],   desc = "Organize imports (TS)" },
             { "<leader>cu", LazyVim.lsp.action["source.removeUnused.ts"],       desc = "Remove unused imports (TS)" },
           },
           settings = {
@@ -141,17 +139,17 @@ return {
         -- Register missing vtsls client command handler to suppress the warning
         -- vtsls sends _typescript.didOrganizeImports after organizing imports,
         -- but Neovim has no built-in handler for it.
-        vtsls = function(_, opts)
+        vtsls = function(_)
           Snacks.util.lsp.on({ name = "vtsls" }, function(_, client)
             client.commands["_typescript.didOrganizeImports"] = function() end
           end)
         end,
 
-        -- ESLint: fix all auto-fixable issues (includes simple-import-sort)
+        -- ESLint: autofix all — includes simple-import-sort ordering
         eslint = function(_, opts)
           opts.on_attach = function(_, bufnr)
-            vim.keymap.set("n", "<leader>ci", "<cmd>LspEslintFixAll<cr>",
-              { buffer = bufnr, desc = "Fix imports (ESLint autofix)" })
+            vim.keymap.set("n", "<leader>co", "<cmd>LspEslintFixAll<cr>",
+              { buffer = bufnr, desc = "Organize imports (ESLint autofix)" })
           end
         end,
 

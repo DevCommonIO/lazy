@@ -10,7 +10,7 @@ return {
   config = function()
     require("git-conflict").setup({
       default_mappings = false,
-      disable_diagnostics = true, -- keeps diagnostics from screaming during conflict resolution
+      disable_diagnostics = false, -- true triggers nil call in current git-conflict.nvim version
       highlights = {
         incoming = "DiffAdd",
         current = "DiffText",

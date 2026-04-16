@@ -11,9 +11,24 @@ return {
       max_count = 3,
       -- Disable in these filetypes
       disabled_filetypes = {
-        "qf", "netrw", "NvimTree", "lazy", "mason", "oil",
-        "neo-tree", "TelescopePrompt", "snacks_picker_input",
+        "qf",
+        "netrw",
+        "NvimTree",
+        "lazy",
+        "mason",
+        "oil",
+        "neo-tree",
+        "TelescopePrompt",
+        "snacks_picker_input",
       },
+      -- Empty tables fully remove hardtime's internal arrow disable (which blocks all modes)
+      disabled_keys = {
+        ["<Up>"] = {},
+        ["<Down>"] = {},
+        ["<Left>"] = {},
+        ["<Right>"] = {},
+      },
+
       -- Keys to restrict repeated use
       restricted_keys = {
         ["h"] = { "n", "x" },
@@ -31,43 +46,96 @@ return {
       },
       -- Patterns that trigger a hint with a suggested alternative
       hints = {
-        -- Esc abuse patterns
-        ["^i<Esc>i$"] = {
-          message = function()
-            return "Use <C-o> for a single action instead of Esc → i"
-          end,
-          length = 5,
-        },
+        -- Re-entering insert right after escaping
         ["^<Esc>i$"] = {
           message = function()
-            return "Re-entering insert? Use a (after), A (end of line), o (below), O (above)"
+            return "Re-entering insert? i = before cursor. Use: a (after), A (end of line), o (below), O (above)"
+          end,
+          length = 3,
+        },
+
+        -- Esc → action → i (use <C-o> instead)
+        ["^<Esc>oi$"] = {
+          message = function()
+            return "Esc → o → i: use <C-o>o to open line below and stay in insert"
           end,
           length = 4,
         },
-        -- Paste pattern
-        ["^<Esc>pi$"] = {
+        ["^<Esc>Oi$"] = {
           message = function()
-            return "Use <C-r>0 to paste from yank register without leaving insert mode"
+            return "Esc → O → i: use <C-o>O to open line above and stay in insert"
+          end,
+          length = 4,
+        },
+        ["^<Esc>Ai$"] = {
+          message = function()
+            return "Esc → A → i: just use A directly from insert with <C-o>A"
+          end,
+          length = 4,
+        },
+        ["^<Esc>ddi$"] = {
+          message = function()
+            return "Esc → dd → i: use <C-o>dd to delete line and stay in insert"
           end,
           length = 5,
         },
-        -- New line pattern
+        ["^<Esc>ui$"] = {
+          message = function()
+            return "Esc → u → i: use <C-o>u to undo and stay in insert"
+          end,
+          length = 4,
+        },
+        ["^<Esc>wi$"] = {
+          message = function()
+            return "Esc → w → i: use <C-o>w to jump word forward and stay in insert"
+          end,
+          length = 4,
+        },
+        ["^<Esc>bi$"] = {
+          message = function()
+            return "Esc → b → i: use <C-o>b to jump word backward and stay in insert"
+          end,
+          length = 4,
+        },
+
+        -- o already enters insert — pressing i after is redundant (types literal "i")
         ["^<Esc>oi$"] = {
           message = function()
-            return "Use <C-o>o instead of Esc → o → i"
+            return "o already enters insert mode — no need for i after. From insert use <C-o>o instead of Esc → o"
           end,
-          length = 5,
+          length = 4,
         },
         ["^<Esc>Oi$"] = {
           message = function()
-            return "Use <C-o>O instead of Esc → O → i"
+            return "O already enters insert mode — no need for i after. From insert use <C-o>O instead of Esc → O"
           end,
-          length = 5,
+          length = 4,
         },
-        -- End of line to insert
-        ["^<Esc>A$"] = {
+
+        -- Coming back to insert after operation: use the right command, not always i
+        ["^<Esc>wi$"] = {
           message = function()
-            return "Use <C-o>A instead of Esc → A"
+            return "After w, use a (after cursor) or A (end of line) instead of i — i inserts before cursor"
+          end,
+          length = 4,
+        },
+        ["^<Esc>bi$"] = {
+          message = function()
+            return "After b, think: do you want a (after), A (end of line), o (below), O (above)? Not always i"
+          end,
+          length = 4,
+        },
+
+        -- Paste then re-enter insert
+        ["^<Esc>pi$"] = {
+          message = function()
+            return "Esc → p → i: use <C-r>0 to paste from yank register without leaving insert"
+          end,
+          length = 4,
+        },
+        ["^<Esc>Pi$"] = {
+          message = function()
+            return "Esc → P → i: use <C-r>0 to paste from yank register without leaving insert"
           end,
           length = 4,
         },
