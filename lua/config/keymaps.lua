@@ -1,6 +1,3 @@
-local discipline = require("moonlucas.discipline")
-discipline.cowboy()
-
 local keymap = vim.keymap
 
 -- Do things without affecting the registers
@@ -8,14 +5,6 @@ keymap.set("n", "x", '"_x', { desc = "Delete char (no yank)" })
 keymap.set("n", "<Leader>p", '"0p', { desc = "Paste last yanked text after" })
 keymap.set("n", "<Leader>P", '"0P', { desc = "Paste last yanked text before" })
 keymap.set("v", "<Leader>p", '"0p', { desc = "Paste last yanked text" })
-
--- NOTE: <leader>d / <leader>D removed — operator maps blocked the entire <leader>d* debug namespace.
--- NOTE: <leader>r / <leader>R removed — conflicts with refactoring.nvim (<leader>re/rf/rv/ri).
--- Use "_c{motion} / "_C natively for change-without-yank.
-
--- Increment/decrement (dial already gives <C-a>/<C-x> via expr mapping if you want)
-keymap.set("n", "+", "<C-a>", { desc = "Increment number" })
-keymap.set("n", "-", "<C-x>", { desc = "Decrement number" })
 
 -- Move line up/down in normal mode (uppercase avoids tmux M-j/M-k conflict)
 keymap.set("n", "<A-J>", "<cmd>m .+1<CR>==", { desc = "Move line down" })
@@ -38,13 +27,23 @@ keymap.set("n", "<Leader>O", 'O<Esc>"_S', { desc = "New line above (no comment c
 -- Jumplist
 keymap.set("n", "<C-m>", "<C-i>", { desc = "Jump forward" })
 
+-- Centered scrolling — never lose cursor position
+keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down (centered)" })
+keymap.set("n", "<C-u>", "<C-u>zz", { desc = "Scroll up (centered)" })
+keymap.set("n", "n", "nzzzv", { desc = "Next search (centered)" })
+keymap.set("n", "N", "Nzzzv", { desc = "Prev search (centered)" })
+
+-- Yank to system clipboard
+keymap.set({ "n", "v" }, "<leader>y", '"+y', { desc = "Yank to clipboard" })
+keymap.set("n", "<leader>Y", '"+Y', { desc = "Yank line to clipboard" })
+
 -- Exit insert mode quickly
 keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
 -- Tabs (optional: consider removing if you don’t use tabs often)
 keymap.set("n", "te", ":tabedit ", { desc = "New tab" })
-keymap.set("n", "<tab>",   "<cmd>tabnext<CR>",     { desc = "Next tab" })
-keymap.set("n", "<s-tab>", "<cmd>tabprevious<CR>",  { desc = "Previous tab" })
+keymap.set("n", "<tab>", "<cmd>tabnext<CR>", { desc = "Next tab" })
+keymap.set("n", "<s-tab>", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
 
 -- Move window
 keymap.set("n", "sh", "<C-w>h", { desc = "Focus left window" })

@@ -60,6 +60,7 @@ vim.opt.splitkeep = "cursor"
 -- Files / Wildmenu
 -- =====================================================
 vim.opt.backup = false
+vim.opt.swapfile = false
 vim.opt.backupskip = { "/tmp/*", "/private/tmp/*" }
 
 vim.opt.path:append({ "**" })
@@ -83,7 +84,7 @@ vim.opt.formatoptions:append({ "r" })
 -- =====================================================
 -- Clipboard (system copy/paste)
 -- =====================================================
-vim.opt.clipboard = "unnamedplus"
+-- vim.opt.clipboard = "unnamedplus"
 
 -- =====================================================
 -- Shell
@@ -123,14 +124,20 @@ vim.opt.showcmd = false
 -- Diff algorithm
 -- =====================================================
 vim.opt.diffopt:append("algorithm:histogram") -- smarter than Myers (fewer spurious hunks)
-vim.opt.diffopt:append("indent-heuristic")    -- place hunks at natural code boundaries
-vim.opt.diffopt:append("linematch:60")        -- match similar lines across hunks
-vim.opt.diffopt:append("context:5")           -- show 5 lines of context around changes
+vim.opt.diffopt:append("indent-heuristic") -- place hunks at natural code boundaries
+vim.opt.diffopt:append("linematch:60") -- match similar lines across hunks
+vim.opt.diffopt:append("context:5") -- show 5 lines of context around changes
 
 -- =====================================================
 -- Better editing UX
 -- =====================================================
 vim.opt.completeopt = { "menu", "menuone", "noselect" }
+
+-- Jumplist behaves like browser back/forward
+vim.opt.jumpoptions = "stack"
+
+-- Allow cursor past line ends in visual block mode
+vim.opt.virtualedit = "block"
 
 -- Keep cursor position when reopening files
 vim.opt.viewoptions = { "cursor", "folds" }

@@ -21,7 +21,7 @@
 | `gg` / `G` | Top / bottom of file |
 | `{n}G` | Go to line n |
 | `H` / `M` / `L` | Top / middle / bottom of screen |
-| `<C-d>` / `<C-u>` | Scroll half page down / up |
+| `<C-d>` / `<C-u>` | Scroll half page down / up (centered) |
 | `<C-o>` / `<C-m>` | Jump backward / forward in jumplist |
 | `*` / `#` | Search word under cursor forward / backward |
 
@@ -116,7 +116,7 @@
 |---------------|-------------|
 | `/pattern` | Search forward |
 | `?pattern` | Search backward |
-| `n` / `N` | Next / prev match |
+| `n` / `N` | Next / prev match (centered) |
 | `cgn` | Change next match (repeat with `.`) |
 | `:%s/old/new/g` | Replace all in file |
 | `:%s/old/new/gc` | Replace with confirmation |
@@ -161,7 +161,6 @@
 | `<leader>dw` | normal | Delete word under cursor (no yank) |
 | `<leader>A` | normal | Select all |
 | `<leader>o` / `<leader>O` | normal | New line below / above (no comment continuation) |
-| `+` / `-` | normal | Increment / decrement number |
 | `<A-J>` / `<A-K>` | n/v | Move line or selection down / up |
 | `<C-m>` | normal | Jump forward (jumplist) |
 | `<leader>id` | normal | Insert date heading (`## YYYY-MM-DD HH:MM`) |
@@ -344,4 +343,3 @@
 | `<leader>rf` | visual | Extract selection to function |
 | `<leader>rv` | visual | Extract selection to variable |
 | `<leader>ri` | n/v | Inline variable |
-

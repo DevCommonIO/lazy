@@ -46,6 +46,13 @@ vim.api.nvim_create_autocmd("InsertLeave", {
   command = "set nopaste",
 })
 
+-- Prevent ftplugins from re-enabling comment continuation on o/O
+vim.api.nvim_create_autocmd("FileType", {
+  callback = function()
+    vim.opt_local.formatoptions:remove({ "o" })
+  end,
+})
+
 -- Disable the concealing in some file formats
 -- The default conceallevel is 3 in LazyVim
 vim.api.nvim_create_autocmd("FileType", {

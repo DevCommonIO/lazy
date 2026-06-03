@@ -42,6 +42,20 @@ return {
     },
   },
 
+  -- Darcula — IntelliJ IDEA default dark theme
+  {
+    "xiantang/darcula-dark.nvim",
+    lazy = true,
+    priority = 1000,
+  },
+
+  -- Neodarcula — IntelliJ newer dark theme with transparency support
+  {
+    "pmouraguedes/neodarcula.nvim",
+    lazy = true,
+    priority = 1000,
+  },
+
   -- Telescope picker to preview & switch live
   {
     "nvim-telescope/telescope.nvim",

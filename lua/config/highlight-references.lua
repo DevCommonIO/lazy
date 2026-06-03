@@ -8,6 +8,9 @@ local function set_reference_highlight()
   vim.api.nvim_set_hl(0, "IlluminatedWordText", { link = "Visual" })
   vim.api.nvim_set_hl(0, "IlluminatedWordRead", { link = "Visual" })
   vim.api.nvim_set_hl(0, "IlluminatedWordWrite", { link = "Visual" })
+
+  -- Inlay hints: solarized base01 (comment tone) + italic to distinguish from code
+  vim.api.nvim_set_hl(0, "LspInlayHint", { fg = "#586e75", italic = true })
 end
 
 set_reference_highlight()

@@ -32,7 +32,6 @@ return {
         update_in_insert = false,
         severity_sort = true,
 
-        -- keep or tweak; set to false if you want NO inline text
         virtual_text = false,
         virtual_lines = false,
         -- settings for :lua vim.diagnostic.open_float(...)
@@ -155,8 +154,6 @@ return {
 
         -- runs for all servers
         ["*"] = function()
-          vim.opt.updatetime = 500
-
           vim.diagnostic.config({
             float = {
               wrap = true,
@@ -177,17 +174,8 @@ return {
 
           vim.keymap.set("n", "<leader>ux", function()
             local cfg = vim.diagnostic.config()
-
-            local vt_enabled = cfg.virtual_text ~= false
-            local vl_enabled = cfg.virtual_lines == true
-
-            local enable = not (vt_enabled or vl_enabled)
-
-            vim.diagnostic.config({
-              virtual_text = enable and { spacing = 2, prefix = "●" } or false,
-              virtual_lines = false, -- keep OFF unless you want to toggle it too
-            })
-          end, { desc = "Toggle inline diagnostics text" })
+            vim.diagnostic.config({ virtual_lines = not cfg.virtual_lines })
+          end, { desc = "Toggle inline diagnostics" })
         end,
       },
     },
