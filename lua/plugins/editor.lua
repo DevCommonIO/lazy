@@ -32,20 +32,12 @@ return {
         "nvim-telescope/telescope-fzf-native.nvim",
         build = "make",
       },
+      "nvim-telescope/telescope-ui-select.nvim",
     },
 
     keys = (function()
       local function get_visual_selection()
-        local bufnr = 0
-        local start = vim.api.nvim_buf_get_mark(bufnr, "<")
-        local finish = vim.api.nvim_buf_get_mark(bufnr, ">")
-        local srow, scol = start[1] - 1, start[2]
-        local erow, ecol = finish[1] - 1, finish[2]
-        if srow > erow or (srow == erow and scol > ecol) then
-          srow, erow = erow, srow
-          scol, ecol = ecol, scol
-        end
-        local lines = vim.api.nvim_buf_get_text(bufnr, srow, scol, erow, ecol + 1, {})
+        local lines = vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = vim.fn.mode() })
         local text = table.concat(lines, "\n")
         return text:gsub("\n", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
       end
@@ -66,11 +58,16 @@ return {
       {
         ";f",
         function()
-          require("telescope.builtin").find_files({
-            hidden = true,
-            no_ignore = false,
-          })
+          local mode = vim.fn.mode()
+          local opts = { hidden = true, no_ignore = false }
+          if mode:match("[vV\22]") then
+            local selection = get_visual_selection()
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+            opts.default_text = selection
+          end
+          require("telescope.builtin").find_files(opts)
         end,
+        mode = { "n", "v" },
         desc = "Find files (respects .gitignore)",
       },
       -- Current buffer search (fuzzy find)
@@ -94,9 +91,7 @@ return {
               },
             })
           else
-            -- Normal mode: prefill with word under cursor
             builtin.current_buffer_fuzzy_find({
-              default_text = vim.fn.expand("<cword>"),
               previewer = true,
               initial_mode = "insert",
               sorting_strategy = "ascending",
@@ -145,10 +140,7 @@ return {
               end,
             })
           else
-            -- Normal mode -> word under cursor
-            local word = vim.fn.expand("<cword>")
             builtin.live_grep({
-              default_text = word,
               additional_args = function()
                 return rg_args()
               end,
@@ -213,11 +205,16 @@ return {
       {
         ";s",
         function()
-          require("telescope.builtin").lsp_document_symbols({
-            symbol_width = 50,
-            show_line = true,
-          })
+          local mode = vim.fn.mode()
+          local opts = { symbol_width = 50, show_line = true }
+          if mode:match("[vV\22]") then
+            local selection = get_visual_selection()
+            vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "n", false)
+            opts.default_text = selection
+          end
+          require("telescope.builtin").lsp_document_symbols(opts)
         end,
+        mode = { "n", "v" },
         desc = "Symbols (LSP)",
       },
 
@@ -253,6 +250,7 @@ return {
 
       telescope.setup(opts)
       telescope.load_extension("fzf")
+      telescope.load_extension("ui-select")
     end,
   },
 

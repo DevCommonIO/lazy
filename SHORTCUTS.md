@@ -211,11 +211,11 @@
 
 | Key | Mode | Description |
 |-----|------|-------------|
-| `;f` | normal | Find files (respects .gitignore) |
+| `;f` | n/v | Find files — prefills selection in visual |
 | `;g` | normal | Git files (+ untracked) |
-| `;r` | n/v | Live grep — word under cursor / visual selection |
-| `;b` | n/v | Fuzzy search current buffer — word / selection |
-| `;s` | normal | LSP document symbols |
+| `;r` | n/v | Live grep — prefills selection in visual |
+| `;b` | n/v | Fuzzy search current buffer — prefills selection in visual |
+| `;s` | n/v | LSP document symbols — prefills selection in visual |
 | `;w` | normal | Diagnostics (workspace) |
 | `;x` | normal | Diagnostics (current buffer) |
 | `;t` | normal | Help tags |
@@ -334,6 +334,7 @@
 | `<leader>i` | normal | Toggle inlay hints |
 | `<leader>ux` | normal | Toggle inline diagnostics |
 | `<leader>z` | normal | Zen mode |
+| `<leader>?` | normal | Open this shortcuts cheatsheet |
 
 ### Refactoring (refactoring.nvim)
 
