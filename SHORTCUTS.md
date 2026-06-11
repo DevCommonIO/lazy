@@ -344,3 +344,94 @@
 | `<leader>rf` | visual | Extract selection to function |
 | `<leader>rv` | visual | Extract selection to variable |
 | `<leader>ri` | n/v | Inline variable |
+
+---
+
+## Bash / Shell Utilities
+
+> macOS note: the built-in `sed`/`grep`/`awk` are **BSD** flavor. Install GNU versions for saner regex: `brew install gnu-sed grep ripgrep fd`. GNU sed is then `gsed`. Examples below flag where BSD differs.
+
+### Find & Replace in Files (`sed`)
+
+| Command | What it does |
+|---------|-------------|
+| `sed 's/old/new/' file` | Replace **first** match per line (prints to stdout) |
+| `sed 's/old/new/g' file` | Replace **all** matches per line |
+| `sed 's/old/new/gI' file` | Replace all, case-**I**nsensitive (GNU) |
+| `sed -n '5,10p' file` | Print only lines 5–10 |
+| `sed '/pattern/d' file` | Delete lines matching pattern |
+| `sed -i '' 's/old/new/g' file` | **In-place** edit (BSD/macOS — note the `''`) |
+| `gsed -i 's/old/new/g' file` | In-place edit (GNU — no `''` needed) |
+| `sed -i '' 's/old/new/g' **/*.ts` | In-place across globbed files |
+
+> **Gotcha:** BSD `sed -i` requires a backup-suffix arg (`-i ''` = no backup). GNU `sed -i` does not. This is the #1 cross-platform footgun.
+
+### Regex with Replace
+
+| Command | What it does |
+|---------|-------------|
+| `sed -E 's/(foo)bar/\1baz/g' f` | **Extended** regex (`-E`) + backreference `\1` |
+| `sed -E 's/[0-9]+/N/g' f` | Replace runs of digits |
+| `sed -E 's/\s+$//' f` | Strip trailing whitespace |
+| `sed -E 's/^(\w+),(\w+)/\2,\1/' f` | Swap two CSV columns |
+| `sed -E 's/(.*)/"\1"/' f` | Wrap each line in quotes |
+| `echo "$x" \| sed -E 's/.*\/([^/]+)$/\1/'` | basename via regex |
+
+> Capture groups: `\1`–`\9` in the replacement. Use `&` to insert the whole match. `-E` lets you write `+ ? () |` without backslashes.
+
+### Project-wide Search & Replace (ripgrep + sed)
+
+```bash
+# Preview every file/line that would change
+rg -l 'oldName' --type ts | xargs gsed -i 's/oldName/newName/g'
+
+# Safer: review matches first, then replace
+rg 'oldName' --type ts          # see what matches
+rg -l 'oldName' | xargs gsed -i 's/oldName/newName/g'
+
+# Whole-word only, with regex
+rg -l '\boldFn\b' | xargs gsed -E -i 's/\boldFn\b/newFn/g'
+```
+
+> In Neovim you already have **`<leader>sr`** (grug-far) for interactive project search/replace — reach for that for anything non-trivial; drop to the CLI for scripted/batch edits.
+
+### Searching (`rg` / `fd`)
+
+| Command | What it does |
+|---------|-------------|
+| `rg 'pat'` | Recursive search (respects `.gitignore`) |
+| `rg -i 'pat'` | Case-insensitive |
+| `rg -w 'word'` | Whole-word match |
+| `rg -l 'pat'` | List only filenames with matches |
+| `rg -A2 -B2 'pat'` | Show 2 lines of context after/before |
+| `rg 'pat' -g '*.lua'` | Restrict to a glob |
+| `rg --hidden -uu 'pat'` | Include hidden + ignored files |
+| `fd '\.lua$'` | Find files by name/regex |
+| `fd -e ts -x prettier --write {}` | Find `.ts`, run command on each |
+
+### Text Pipeline Quickies
+
+| Command | What it does |
+|---------|-------------|
+| `awk '{print $2}'` | Print 2nd whitespace-delimited column |
+| `awk -F, '{print $1}'` | Print 1st CSV column (`-F,`) |
+| `cut -d: -f1 /etc/passwd` | Split on `:`, take field 1 |
+| `sort \| uniq -c \| sort -rn` | Count + rank duplicates |
+| `tr '[:upper:]' '[:lower:]'` | Lowercase a stream |
+| `head -n 20` / `tail -n 20` | First / last 20 lines |
+| `tail -f log` | Follow a growing file live |
+| `wc -l < file` | Count lines |
+
+### Optimized Suggestions for Your Setup
+
+- **Add fish abbreviations** (`~/.config/fish/config.fish`) for the verbose ones you repeat:
+  ```fish
+  abbr -a rgr 'rg -l'                       # list matching files
+  abbr -a sedi 'gsed -i'                    # GNU in-place, no BSD footgun
+  abbr -a ff   'fd -t f'                    # find files only
+  abbr -a lower "tr '[:upper:]' '[:lower:]'"
+  ```
+- **Make `gsed` your default mental model** — install `gnu-sed` so your scripts are portable to Linux/CI; reserve BSD `sed -i ''` only for one-offs.
+- **Dry-run before destructive in-place edits:** run the `rg -l ... | xargs gsed ...` pipe first *without* `-i` (use `gsed 's/.../.../g'` to print) so you see the result, then add `-i`.
+- **Prefer `<leader>sr` (grug-far) inside Neovim** for anything you want to eyeball; the CLI pipeline shines for headless/batch or multi-repo edits.
+- **Quote your globs in fish:** fish expands `*` itself — wrap patterns for `rg`/`fd` in quotes (`rg 'pat' -g '*.ts'`) so the tool does the matching.
