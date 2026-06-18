@@ -56,6 +56,16 @@ return {
     priority = 1000,
   },
 
+  -- Java / JetBrains-IDE themes are exposed under custom `java-*` names via thin
+  -- alias files in `colors/` (so they group together in the picker). They reuse
+  -- the plugins above — no extra dependencies:
+  --   java-darcula         → darcula-dark   (classic IntelliJ IDEA Darcula)
+  --   java-darcula-solid   → darcula-solid  (high-contrast Darcula)
+  --   java-darcula-darker  → darcula-darker (deeper background)
+  --   java-darcula-new     → neodarcula     (IntelliJ "New UI" dark)
+  --   java-dracula         → dracula        (Dracula palette)
+  --   java-light           → catppuccin-latte (IntelliJ Light feel)
+
   -- Telescope picker to preview & switch live
   {
     "nvim-telescope/telescope.nvim",

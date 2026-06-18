@@ -92,6 +92,7 @@ return {
             })
           else
             builtin.current_buffer_fuzzy_find({
+              default_text = vim.fn.expand("<cword>"),
               previewer = true,
               initial_mode = "insert",
               sorting_strategy = "ascending",
@@ -141,6 +142,7 @@ return {
             })
           else
             builtin.live_grep({
+              default_text = vim.fn.expand("<cword>"),
               additional_args = function()
                 return rg_args()
               end,

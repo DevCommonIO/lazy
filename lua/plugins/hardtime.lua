@@ -27,13 +27,16 @@ return {
         ["<Down>"] = {},
         ["<Left>"] = {},
         ["<Right>"] = {},
+        ["j"] = {},
+        ["k"] = {},
       },
 
       -- Keys to restrict repeated use
       restricted_keys = {
         ["h"] = { "n", "x" },
-        ["j"] = { "n", "x" },
-        ["k"] = { "n", "x" },
+        -- Empty tables override hardtime's defaults so j/k are never flagged when repeated
+        ["j"] = {},
+        ["k"] = {},
         ["l"] = { "n", "x" },
         ["-"] = { "n", "x" },
         ["+"] = { "n", "x" },
