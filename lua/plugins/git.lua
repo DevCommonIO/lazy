@@ -47,4 +47,23 @@ return {
     },
     dependencies = { "nvim-lua/plenary.nvim" },
   },
+
+  -- Side-by-side diff / merge / file-history review inside Neovim
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles" },
+    keys = {
+      { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Diffview: open (working tree)" },
+      { "<leader>gV", "<cmd>DiffviewClose<cr>", desc = "Diffview: close" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Diffview: current file history" },
+      { "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: repo history" },
+    },
+    opts = {
+      enhanced_diff_hl = true, -- richer highlighting inside diffs
+      view = {
+        default = { layout = "diff2_horizontal" }, -- side-by-side
+        merge_tool = { layout = "diff3_mixed" },
+      },
+    },
+  },
 }

@@ -207,6 +207,35 @@
 
 ---
 
+## File Explorer (Snacks)
+
+| Key | Mode | Description |
+|-----|------|--------------|
+| `<leader>ee` | normal | Open explorer (root dir) |
+| `<leader>eE` | normal | Open explorer (cwd) |
+| `<leader>ef` | normal | Open explorer, focused on current file |
+
+### Inside the explorer
+
+| Key | Description |
+|-----|-------------|
+| `<CR>` / `l` | Open file or toggle directory |
+| `h` | Close directory |
+| `<BS>` | Go up one directory |
+| `.` | Focus on current directory (set as cwd) |
+| `H` / `I` | Toggle hidden / gitignored files |
+| `a` | Add new file or directory |
+| `d` | Delete file(s) |
+| `r` | Rename |
+| `m` / `c` | Move / copy selected files to current directory |
+| `y` / `p` | Yank / paste file path(s) |
+| `o` | Open with system application |
+| `u` | Refresh tree |
+| `]g` / `[g` | Next / prev git change |
+| `]d` / `[d` | Next / prev diagnostic |
+
+---
+
 ## Telescope / Search
 
 | Key | Mode | Description |
@@ -299,6 +328,31 @@
 | `<leader>gd` | normal | Diff this |
 | `<leader>gq` | normal | Close diff window |
 | `<leader>gg` | normal | Open LazyGit |
+| `<leader>gv` | normal | Diffview: open side-by-side diff (working tree) |
+| `<leader>gV` | normal | Diffview: close |
+| `<leader>gh` | normal | Diffview: current file history |
+| `<leader>gH` | normal | Diffview: repo history |
+
+### Inside Diffview (`g?` for full help)
+
+| Key | Panel | Description |
+|-----|-------|-------------|
+| `<Tab>` / `<S-Tab>` | any | Open next / prev file's diff |
+| `]c` / `[c` | diff | Next / prev change (native diff) |
+| `<C-f>` / `<C-b>` | diff | Scroll diff down / up |
+| `j` / `k` | file panel | Move down / up the file list |
+| `<CR>` / `o` / `l` | file panel | Open selected file's diff |
+| `-` / `s` | file panel | Stage / unstage entry |
+| `S` / `U` | file panel | Stage all / unstage all |
+| `X` | file panel | Restore entry to left-side state (discard) |
+| `i` | file panel | Toggle list ↔ tree view |
+| `R` | file panel | Refresh file list |
+| `<leader>b` | any | Toggle file panel |
+| `<leader>e` | any | Focus file panel |
+| `gf` | diff | Open the real file to edit it |
+| `y` | history | Copy commit hash |
+| `L` | history | Show commit details / log |
+| `g?` | any | Open Diffview help panel |
 
 ---
 

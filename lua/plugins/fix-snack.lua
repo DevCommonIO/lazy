@@ -19,5 +19,39 @@ return {
 
       return opts
     end,
+
+    keys = {
+      -- Reorganize explorer keymaps under <leader>e (was a single <leader>e / <leader>E)
+      { "<leader>e", false },
+      { "<leader>E", false },
+      {
+        "<leader>ee",
+        function()
+          Snacks.explorer({ cwd = LazyVim.root() })
+        end,
+        desc = "Explorer (root dir)",
+      },
+      {
+        "<leader>eE",
+        function()
+          Snacks.explorer()
+        end,
+        desc = "Explorer (cwd)",
+      },
+      {
+        "<leader>ef",
+        function()
+          Snacks.explorer.reveal()
+        end,
+        desc = "Explorer (focus current file)",
+      },
+      {
+        "<leader>eo",
+        function()
+          vim.ui.open(vim.fn.expand("%:p:h"))
+        end,
+        desc = "Open in Finder (current file dir)",
+      },
+    },
   },
 }
