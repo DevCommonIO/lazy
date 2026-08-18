@@ -235,7 +235,8 @@ return {
       local telescope = require("telescope")
 
       opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
-        wrap_results = true,
+        wrap_results = false,
+        path_display = { "filename_first" },
         layout_strategy = "horizontal",
         layout_config = { prompt_position = "top" },
         sorting_strategy = "ascending",
@@ -253,6 +254,14 @@ return {
       telescope.setup(opts)
       telescope.load_extension("fzf")
       telescope.load_extension("ui-select")
+
+      vim.keymap.set("n", "<leader>uw", function()
+        local wrapped = opts.defaults.wrap_results
+        opts.defaults.wrap_results = not wrapped
+        opts.defaults.path_display = wrapped and { "filename_first" } or false
+        telescope.setup(opts)
+        vim.notify("Telescope results: " .. (opts.defaults.wrap_results and "wrap (full path)" or "filename first (one line)"))
+      end, { desc = "Toggle Telescope result wrapping" })
     end,
   },
 

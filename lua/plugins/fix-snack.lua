@@ -13,9 +13,8 @@ return {
       opts.picker = opts.picker or {}
       opts.picker.titles = opts.picker.titles or {}
 
-      -- 🔥 ADD THIS
       opts.explorer.hidden = true -- show hidden files
-      opts.explorer.ignored = true -- show gitignored files (optional)
+      opts.explorer.ignored = true -- show gitignored files
 
       return opts
     end,
