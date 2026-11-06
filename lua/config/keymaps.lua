@@ -24,8 +24,9 @@ keymap.set("n", "<leader>A", "gg<S-v>G", { desc = "Select all" })
 keymap.set("n", "<Leader>o", 'o<Esc>"_S', { desc = "New line below (no comment continuation)" })
 keymap.set("n", "<Leader>O", 'O<Esc>"_S', { desc = "New line above (no comment continuation)" })
 
--- Jumplist
-keymap.set("n", "<C-m>", "<C-i>", { desc = "Jump forward" })
+-- Jumplist: <C-o> back / <C-i> forward both work natively -- no mapping needed.
+-- Do NOT map <C-m> to <C-i>: <C-m> is the same keycode as <CR>, so it hijacks
+-- Enter in normal mode.
 
 -- Centered scrolling — never lose cursor position
 keymap.set("n", "<C-d>", "<C-d>zz", { desc = "Scroll down (centered)" })
@@ -40,10 +41,17 @@ keymap.set("n", "<leader>Y", '"+Y', { desc = "Yank line to clipboard" })
 -- Exit insert mode quickly
 keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })
 
--- Tabs (optional: consider removing if you don’t use tabs often)
+-- Tabs
+-- NOTE: <tab> is NOT mapped here on purpose. <Tab> and <C-i> are the same
+-- keycode, so mapping <tab> in normal mode silently breaks <C-i>
+-- (jumplist forward). Use the built-in gt / gT to cycle tabs instead.
 keymap.set("n", "te", ":tabedit ", { desc = "New tab" })
-keymap.set("n", "<tab>", "<cmd>tabnext<CR>", { desc = "Next tab" })
-keymap.set("n", "<s-tab>", "<cmd>tabprevious<CR>", { desc = "Previous tab" })
+
+-- Split / close windows (s prefix; plain `s` is still Flash jump)
+keymap.set("n", "ss", "<cmd>split<CR>", { desc = "Split window below" })
+keymap.set("n", "sv", "<cmd>vsplit<CR>", { desc = "Split window right" })
+keymap.set("n", "sq", "<C-w>q", { desc = "Close window" })
+keymap.set("n", "so", "<C-w>o", { desc = "Only this window" })
 
 -- Move window
 keymap.set("n", "sh", "<C-w>h", { desc = "Focus left window" })
@@ -59,11 +67,8 @@ keymap.set("t", "<C-l>", [[<C-\><C-n><C-w>l]], { desc = "Focus right window" })
 -- Enter normal mode inside terminal (to scroll/visual/yank), then i/a to return
 keymap.set("t", "<Esc><Esc>", [[<C-\><C-n>]], { desc = "Terminal → normal mode" })
 
--- Resize window
-keymap.set("n", "<M-left>", "<C-w><", { desc = "Resize window left" })
-keymap.set("n", "<M-right>", "<C-w>>", { desc = "Resize window right" })
-keymap.set("n", "<M-up>", "<C-w>+", { desc = "Resize window up" })
-keymap.set("n", "<M-down>", "<C-w>-", { desc = "Resize window down" })
+-- Resize window: <M-arrows> and <M-h/j/k/l> focus live in lua/plugins/smart-splits.lua
+-- (shared with tmux panes).
 
 -- Custom tools
 keymap.set("n", "<leader>i", function()
@@ -86,9 +91,9 @@ vim.keymap.set("n", "<leader>xn", function()
   Snacks.scratch({ name = name, ft = "markdown" })
 end, { desc = "New Scratch (timestamped)" })
 
--- Shortcuts cheatsheet floating window
-keymap.set("n", "<leader>?", function()
-  local path = vim.fn.stdpath("config") .. "/SHORTCUTS.md"
+-- Cheatsheet floating windows: <leader>? = full reference, <leader>H = daily workflow
+local function open_cheatsheet(file, title)
+  local path = vim.fn.stdpath("config") .. "/" .. file
   local buf = vim.api.nvim_create_buf(false, true)
   local lines = vim.fn.readfile(path)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
@@ -104,9 +109,16 @@ keymap.set("n", "<leader>?", function()
     row = math.floor((vim.o.lines - height) / 2),
     style = "minimal",
     border = "rounded",
-    title = " Shortcuts ",
+    title = title,
     title_pos = "center",
   })
   vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = buf })
   vim.keymap.set("n", "<Esc>", "<cmd>close<CR>", { buffer = buf })
+end
+
+keymap.set("n", "<leader>?", function()
+  open_cheatsheet("SHORTCUTS.md", " Shortcuts ")
 end, { desc = "Shortcuts cheatsheet" })
+keymap.set("n", "<leader>H", function()
+  open_cheatsheet("DAILY.md", " Daily workflow ")
+end, { desc = "Daily workflow cheatsheet" })

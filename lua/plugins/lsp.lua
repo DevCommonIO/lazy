@@ -1,4 +1,50 @@
 -- File: lua/plugins/lsp.lua
+
+-- vtsls (tsserver) frequently reports the same location twice for a given
+-- symbol (e.g. the method identifier and its containing span), which makes
+-- Telescope's picker show duplicate-looking entries. Dedupe by uri+start
+-- position before showing anything, and skip the picker entirely when only
+-- one unique location remains.
+local function vtsls_goto(method, extra_params)
+  return function()
+    local client = vim.lsp.get_clients({ bufnr = 0, name = "vtsls" })[1]
+    if not client then
+      return
+    end
+
+    local params = vim.lsp.util.make_position_params(0, client.offset_encoding)
+    if extra_params then
+      params = vim.tbl_extend("force", params, extra_params)
+    end
+
+    client.request(method, params, function(err, result)
+      if err or not result or vim.tbl_isempty(result) then
+        return
+      end
+
+      local items = vim.islist(result) and result or { result }
+      local seen, deduped = {}, {}
+      for _, item in ipairs(items) do
+        local uri = item.uri or item.targetUri
+        local range = item.range or item.targetSelectionRange
+        local key = uri .. ":" .. range.start.line .. ":" .. range.start.character
+        if not seen[key] then
+          seen[key] = true
+          table.insert(deduped, item)
+        end
+      end
+
+      if #deduped == 1 then
+        vim.lsp.util.jump_to_location(deduped[1], client.offset_encoding, true)
+      else
+        local qf_items = vim.lsp.util.locations_to_items(deduped, client.offset_encoding)
+        vim.fn.setqflist(qf_items)
+        require("telescope.builtin").quickfix()
+      end
+    end, 0)
+  end
+end
+
 return {
   {
     "mason-org/mason.nvim",
@@ -76,6 +122,13 @@ return {
           keys = {
             { "<leader>ci", LazyVim.lsp.action["source.addMissingImports.ts"], desc = "Add missing imports (TS)" },
             { "<leader>cu", LazyVim.lsp.action["source.removeUnused.ts"],       desc = "Remove unused imports (TS)" },
+            { "gd", vtsls_goto("textDocument/definition"), desc = "Goto Definition (deduped)" },
+            {
+              "gr",
+              vtsls_goto("textDocument/references", { context = { includeDeclaration = true } }),
+              desc = "References (deduped)",
+              nowait = true,
+            },
           },
           settings = {
             typescript = {

@@ -16,16 +16,16 @@ return {
         map("n", "[h", gs.prev_hunk, "Prev hunk")
 
         -- Actions (leader g = git)
-        map("n", "<leader>gs", gs.stage_hunk, "Stage hunk")
+        map("n", "<leader>ga", gs.stage_hunk, "Stage hunk (git add)")
         map("n", "<leader>gr", gs.reset_hunk, "Reset hunk")
-        map("v", "<leader>gs", function()
+        map("v", "<leader>ga", function()
           gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
         end, "Stage selection")
         map("v", "<leader>gr", function()
           gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
         end, "Reset selection")
 
-        map("n", "<leader>gS", gs.stage_buffer, "Stage buffer")
+        map("n", "<leader>gA", gs.stage_buffer, "Stage buffer")
         map("n", "<leader>gR", gs.reset_buffer, "Reset buffer")
 
         map("n", "<leader>gp", gs.preview_hunk, "Preview hunk")
@@ -56,7 +56,33 @@ return {
       { "<leader>gv", "<cmd>DiffviewOpen<cr>", desc = "Diffview: open (working tree)" },
       { "<leader>gV", "<cmd>DiffviewClose<cr>", desc = "Diffview: close" },
       { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "Diffview: current file history" },
+      { "<leader>gf", "<cmd>DiffviewOpen -- %<cr>", desc = "Diffview: current file vs HEAD (working tree)" },
       { "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Diffview: repo history" },
+
+      -- Code review: this branch vs where it forked off the base branch.
+      -- Uses `base...HEAD` (three dots = merge base), so you see only what the
+      -- branch changed, not unrelated commits that landed on the base since.
+      {
+        "<leader>gc",
+        function()
+          require("moonlucas.git").review()
+        end,
+        desc = "Review: branch vs base (merge base)",
+      },
+      {
+        "<leader>gC",
+        function()
+          require("moonlucas.git").review({ prompt = true })
+        end,
+        desc = "Review: branch vs base (pick base)",
+      },
+      {
+        "<leader>gL",
+        function()
+          require("moonlucas.git").review({ log = true })
+        end,
+        desc = "Review: commits on this branch",
+      },
     },
     opts = {
       enhanced_diff_hl = true, -- richer highlighting inside diffs

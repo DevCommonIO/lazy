@@ -70,3 +70,15 @@ vim.api.nvim_create_autocmd("BufWritePre", {
     vim.fn.winrestview(view)
   end,
 })
+
+-- Use the IntelliJ-style Darcula theme when working on Java
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "java",
+  nested = true, -- let ColorScheme fire so bufferline/lualine/etc. refresh their colors
+  callback = function()
+    if vim.g.colors_name ~= "darcula-dark" then
+      vim.cmd.colorscheme("java-darcula")
+    end
+    require("config.java-highlights").apply()
+  end,
+})

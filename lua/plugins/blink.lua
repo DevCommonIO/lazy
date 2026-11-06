@@ -10,6 +10,10 @@ return {
       opts.keymap["<S-Tab>"] = { "select_prev", "fallback" }
       opts.keymap["<CR>"] = { "accept", "fallback" }
 
+      -- Manually open completion. <C-Space> is the tmux prefix, so use Alt+Space.
+      opts.keymap["<C-space>"] = {}
+      opts.keymap["<M-space>"] = { "show", "show_documentation", "hide_documentation" }
+
       -- Snippet placeholder navigation (no Tab conflicts)
       opts.keymap["<C-j>"] = { "snippet_forward", "fallback" }
       opts.keymap["<C-k>"] = { "snippet_backward", "fallback" }

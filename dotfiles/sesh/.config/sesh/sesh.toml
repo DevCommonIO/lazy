@@ -1,0 +1,22 @@
+# sesh — fuzzy tmux session picker. Open it with `prefix f` (see ~/.tmux.conf).
+# Sources: running tmux sessions, the sessions below, and zoxide dirs (any dir you've cd'd into).
+
+# New sessions created from a directory open nvim in that project.
+# Split a logs/program pane with Alt+v / Alt+s when you need one.
+[default_session]
+startup_command = "nvim"
+
+[[session]]
+name = "main"
+path = "~"
+disable_startup_command = true
+
+[[session]]
+name = "nvim-config"
+path = "~/.config/nvim"
+startup_command = "nvim"
+
+[[session]]
+name = "dotfiles"
+path = "~/dotfiles"
+startup_command = "nvim"

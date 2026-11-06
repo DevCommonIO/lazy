@@ -1,6 +1,6 @@
 # jk Neovim Shortcuts Reference
 
-> Leader = `Space`
+> Leader = `Space` · Daily workflow cheatsheet: `DAILY.md` (`<leader>H`)
 
 ---
 
@@ -9,7 +9,7 @@
 ### Motions
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `w` / `W` | Next word start (word / WORD) |
 | `e` / `E` | Next word end |
 | `b` / `B` | Prev word start |
@@ -22,15 +22,47 @@
 | `{n}G` | Go to line n |
 | `H` / `M` / `L` | Top / middle / bottom of screen |
 | `<C-d>` / `<C-u>` | Scroll half page down / up (centered) |
-| `<C-o>` / `<C-m>` | Jump backward / forward in jumplist |
+| `<C-o>` / `<C-i>` | Jump backward / forward in jumplist |
 | `*` / `#` | Search word under cursor forward / backward |
+
+#### Jumping back and forth (jumplist)
+
+After `gd` takes you into a definition, `<C-o>` walks *back* and `<C-i>` walks
+*forward* again — no need to re-run `gd`.
+
+```
+method ab ──gd──> method bc
+          <──<C-o>──
+          ──<C-i>──>
+```
+
+| Key | Description |
+| ----- | ------------- |
+| `<C-o>` | Jump backward (older position) |
+| `<C-i>` | Jump forward (newer position) |
+| `:jumps` | List the whole jumplist with line numbers |
+| `g;` / `g,` | Backward / forward through the **changelist** (where you last edited) |
+| `<C-t>` | Pop the tag stack (undo a `<C-]>` tag jump) |
+| `` `` `` | Back to position before the last jump |
+| `''` | Same, but to the first non-blank of that line |
+
+**Notes**
+
+- `<C-i>` and `<Tab>` are the same keycode. Inside Diffview, `<Tab>` is remapped
+  to "next file", so jumplist-forward won't work in those buffers.
+- Never map `<C-m>`: it's the same keycode as `<CR>`, so mapping it hijacks Enter
+  in normal mode.
+- The jumplist holds 100 entries and persists across sessions via shada. `:jumps`
+  is the fastest way to see where you actually are in it.
+- Only *jumps* are recorded, not ordinary motions — `j`/`k` don't add entries, but
+  `gd`, `G`, `{n}G`, `/`, `}` and friends do.
 
 ### Operators + Text Objects
 
 > Pattern: `{operator}{modifier}{object}` — e.g. `ci"`, `da{`, `yip`
 
 | Operator | Description |
-|----------|-------------|
+| ---------- | ------------- |
 | `d` | Delete |
 | `c` | Change (delete + insert) |
 | `y` | Yank (copy) |
@@ -45,7 +77,7 @@
 | `a` | **a**round (includes delimiters) |
 
 | Object | Matches |
-|--------|---------|
+| -------- | --------- |
 | `w` / `W` | word / WORD |
 | `s` | sentence |
 | `p` | paragraph |
@@ -59,7 +91,7 @@
 **Examples:**
 
 | Command | What it does |
-|---------|-------------|
+| --------- | ------------- |
 | `ciw` | Change word under cursor |
 | `ci"` | Change content inside quotes |
 | `ca{` | Change `{…}` block including braces |
@@ -74,7 +106,7 @@
 ### Useful Operators in Normal Mode
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `dd` / `yy` | Delete / yank current line |
 | `D` / `Y` | Delete / yank to end of line |
 | `cc` / `S` | Change entire line |
@@ -91,7 +123,7 @@
 ### Insert Mode
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `I` / `A` | Insert at line start / end |
 | `i` / `a` | Insert before cursor / after |
 | `o` / `O` | New line below / above and insert |
@@ -103,7 +135,7 @@
 ### Visual Mode
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `v` / `V` / `<C-v>` | Char / line / block visual |
 | `o` | Move to other end of selection |
 | `gv` | Re-select last visual selection |
@@ -113,7 +145,7 @@
 ### Search & Replace
 
 | Key / Command | Description |
-|---------------|-------------|
+| --------------- | ------------- |
 | `/pattern` | Search forward |
 | `?pattern` | Search backward |
 | `n` / `N` | Next / prev match (centered) |
@@ -126,7 +158,7 @@
 ### Registers & Marks
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `"ayy` | Yank line into register `a` |
 | `"ap` | Paste from register `a` |
 | `"+y` / `"+p` | Yank to / paste from system clipboard |
@@ -139,9 +171,13 @@
 ### Folds & Code Navigation
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
+| `zR` | **Open all folds** |
+| `zM` | Close all folds |
 | `za` | Toggle fold under cursor |
-| `zM` / `zR` | Close / open all folds |
+| `zo` / `zc` | Open / close fold under cursor |
+| `zj` / `zk` | Jump to next / previous fold |
+| `zv` | Open just enough to see the cursor line |
 | `gd` | Go to definition (LSP) |
 | `gD` | Go to declaration (LSP) |
 | `gr` | Go to references (LSP) |
@@ -154,15 +190,16 @@
 ## Custom Editing (your config)
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `jk` | insert | Exit insert mode |
 | `x` | normal | Delete char (no yank) |
 | `<leader>p` / `<leader>P` | n/v | Paste last yanked text after / before |
+| `<leader>sy` | n/v | Yank history picker |
+| `<M-Space>` | n/x | Grow selection by syntax node (`<BS>` shrinks) |
 | `<leader>dw` | normal | Delete word under cursor (no yank) |
 | `<leader>A` | normal | Select all |
 | `<leader>o` / `<leader>O` | normal | New line below / above (no comment continuation) |
 | `<A-J>` / `<A-K>` | n/v | Move line or selection down / up |
-| `<C-m>` | normal | Jump forward (jumplist) |
 | `<leader>id` | normal | Insert date heading (`## YYYY-MM-DD HH:MM`) |
 | `<leader>xn` | normal | New timestamped scratch buffer (markdown) |
 
@@ -171,33 +208,57 @@
 ## Windows & Tabs
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `ss` | normal | Horizontal split |
 | `sv` | normal | Vertical split |
 | `sh` / `sj` / `sk` / `sl` | normal | Focus left / down / up / right window |
 | `sq` | normal | Close window |
 | `so` | normal | Only window (close others) |
-| `<M-←>` / `<M-→>` | normal | Resize window left / right |
-| `<M-↑>` / `<M-↓>` | normal | Resize window up / down |
+| `<M-h/j/k/l>` | normal/terminal | Focus split — crosses into tmux panes at the edge (smart-splits) |
+| `<M-←>` / `<M-→>` | normal | Resize split left / right (tmux panes too) |
+| `<M-↑>` / `<M-↓>` | normal | Resize split up / down (tmux panes too) |
 | `te` | normal | New tab |
-| `<Tab>` / `<S-Tab>` | normal | Next / prev tab |
+| `gt` / `gT` | normal | Next / prev tab (built-in; `<Tab>` is left free for `<C-i>`) |
 
 ---
 
 ## Terminal (Claude CLI / DAP)
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<C-h/j/k/l>` | terminal | Navigate to adjacent window |
 | `<Esc><Esc>` | terminal | Enter normal mode (to scroll/visual/yank) |
 | `i` / `a` | normal | Return to terminal insert mode |
 
 ---
 
+## tmux (prefix = `C-Space`)
+
+| Key | Description |
+| ----- | ------------- |
+| `M-h/j/k/l` | Move between panes (and nvim splits) |
+| `M-←/→/↑/↓` | Resize pane |
+| `M-v` / `M-s` | Split vertical / horizontal (also `prefix \|` / `prefix -`) |
+| `M-c` | New window · `M-1..9` jump to window · `M-r` rename window |
+| `prefix z` | Zoom pane (toggle) |
+| `prefix x` / `prefix &` | Kill pane / window (asks to confirm) |
+| `M-y` / `prefix [` | Copy mode (`v` select, `y` copy to clipboard, `q`/Esc quit) |
+| `prefix ]` / `prefix P` | Paste buffer / choose buffer |
+| `prefix n` / `prefix p` | Next / previous window |
+| `prefix f` | **sesh** picker: switch to / create a project session (new ones open nvim) |
+| `prefix L` | Back to the last session |
+| `Cmd+D` / `Cmd+Shift+D` | (iTerm2) tmux split side-by-side / stacked |
+| `Cmd+h/j/k/l` | (iTerm2) same as `M-h/j/k/l` |
+| `z <dir>` | (zsh) zoxide jump; also feeds the sesh list |
+| `prefix r` | Reload `~/.tmux.conf` |
+| Mouse drag / double / triple click | Select & copy (in nvim: hold Option for terminal selection) |
+
+---
+
 ## Harpoon (file bookmarks)
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<leader>ha` | normal | Add current file to harpoon |
 | `<leader>hh` | normal | Open harpoon quick menu |
 | `<C-h>` | normal | Jump to harpoon file 1 |
@@ -210,7 +271,7 @@
 ## File Explorer (Snacks)
 
 | Key | Mode | Description |
-|-----|------|--------------|
+| ----- | ------ | -------------- |
 | `<leader>ee` | normal | Open explorer (root dir) |
 | `<leader>eE` | normal | Open explorer (cwd) |
 | `<leader>ef` | normal | Open explorer, focused on current file |
@@ -218,7 +279,7 @@
 ### Inside the explorer
 
 | Key | Description |
-|-----|-------------|
+| ----- | ------------- |
 | `<CR>` / `l` | Open file or toggle directory |
 | `h` | Close directory |
 | `<BS>` | Go up one directory |
@@ -239,7 +300,7 @@
 ## Telescope / Search
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `;f` | n/v | Find files — prefills selection in visual |
 | `;g` | normal | Git files (+ untracked) |
 | `;r` | n/v | Live grep — prefills selection in visual |
@@ -258,24 +319,25 @@
 ## Completion (blink.cmp)
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<Tab>` / `<S-Tab>` | insert | Next / prev completion item |
 | `<CR>` | insert | Accept completion |
 | `<C-j>` / `<C-k>` | insert | Snippet jump forward / backward |
 | `<C-e>` | insert | Cancel completion |
 | `<C-f>` / `<C-b>` | insert | Scroll docs down / up |
+| `<M-Space>` | insert | Open completion / toggle docs (`<C-Space>` is the tmux prefix) |
 
 ---
 
 ## Copilot
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<C-l>` | insert | Accept suggestion |
 | `<C-Right>` | insert | Accept next word |
 | `<C-Down>` | insert | Accept full line |
-| `<C-]>` / `<C-[>` | insert | Next / prev suggestion |
-| `<C-;>` | insert | Dismiss suggestion |
+| `<C-]>` / `<M-p>` | insert | Next / prev suggestion |
+| `<M-e>` | insert | Dismiss suggestion |
 | `<leader>ap` | normal | Toggle Copilot auto-trigger |
 
 ---
@@ -283,7 +345,7 @@
 ## CopilotChat
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<leader>Ca` | n/v | Open chat |
 | `<leader>Ct` | n/v | Toggle chat |
 | `<leader>Cq` | n/v | Ask (prefills selection if visual) |
@@ -300,7 +362,7 @@
 ## Claude Code CLI
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<leader>ac` | normal | Toggle Claude terminal |
 | `<leader>af` | normal | Focus Claude terminal |
 | `<leader>ar` | normal | Resume last session |
@@ -314,14 +376,66 @@
 
 ---
 
+## Sidekick (AI CLIs + Next Edit Suggestions)
+
+> From the `ai.sidekick` LazyVim extra. Runs Codex, Claude, Copilot CLI etc. in a
+> terminal split, plus Copilot-powered next-edit suggestions (NES).
+
+| Key | Mode | Description |
+| ----- | ------ | ------------- |
+| `<M-.>` | n/t/i/x | Focus / hide the Sidekick CLI window |
+| `<leader>aSa` | normal | Toggle CLI |
+| `<leader>aSc` | normal | Toggle Codex directly (focused) |
+| `<leader>aSs` | normal | Select CLI tool (e.g. `codex`) |
+| `<leader>aSd` | normal | Detach / close CLI session |
+| `<leader>aSt` | n/x | Send `{this}` (cursor context / selection) |
+| `<leader>aSf` | normal | Send current file |
+| `<leader>aSv` | visual | Send visual selection |
+| `<leader>aSp` | n/x | Pick a prompt |
+| `<Tab>` | normal | Jump to / apply next edit suggestion (NES) |
+| `<leader>uN` | normal | Toggle Sidekick NES |
+
+**Inside the CLI terminal**
+
+| Key | Description |
+| ----- | ------------- |
+| `<M-.>` | Hide the terminal (`<C-.>` can't be sent through iTerm2/tmux) |
+| `<C-z>` | Back to previous window without hiding |
+| `<C-q>` | Normal mode (terminal) / hide (normal mode) |
+| `q` | Hide (normal mode) |
+| `<C-p>` | Insert a prompt or context variable |
+| `<C-f>` / `<C-b>` | File / buffer picker |
+| `<C-h>` | Navigate to left window |
+
+**Commands**
+
+| Command | Description |
+| --------- | ------------- |
+| `:Sidekick cli toggle name=codex focus=true` | Open / toggle Codex directly |
+| `:Sidekick cli select` | Pick a tool |
+| `:Sidekick cli prompt` | Pick a prompt |
+| `:Sidekick cli send msg="{file}"` | Send file path to the CLI |
+| `:Sidekick nes enable` / `disable` | Turn NES on / off |
+
+Context variables for `send`: `{this}`, `{file}`, `{selection}`, `{position}`,
+`{diagnostics}`, `{buffers}`.
+
+**Notes**
+
+- Codex needs the CLI installed (`npm i -g @openai/codex`) and a login (`codex`).
+- Sidekick keys live under `<leader>aS` (`lua/plugins/sidekick.lua`) so they
+  don't clash with Claude Code (`<leader>a…`) or the Copilot toggle (`<leader>ap`).
+
+---
+
 ## Git
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `]h` / `[h` | normal | Next / prev hunk |
-| `<leader>gs` | n/v | Stage hunk / selection |
+| `<leader>ga` | n/v | Stage hunk / selection (git add) |
 | `<leader>gr` | n/v | Reset hunk / selection |
-| `<leader>gS` | normal | Stage entire buffer |
+| `<leader>gA` | normal | Stage entire buffer |
 | `<leader>gR` | normal | Reset entire buffer |
 | `<leader>gp` | normal | Preview hunk |
 | `<leader>gb` | normal | Toggle line blame |
@@ -332,11 +446,64 @@
 | `<leader>gV` | normal | Diffview: close |
 | `<leader>gh` | normal | Diffview: current file history |
 | `<leader>gH` | normal | Diffview: repo history |
+| `<leader>gc` | normal | Review: branch vs base branch (auto-detect) |
+| `<leader>gC` | normal | Review: branch vs base branch (pick base) |
+| `<leader>gL` | normal | Review: commits on this branch only |
+
+### Reviewing someone else's branch (PR-style)
+
+Check out the branch, then hit `<leader>gc`. You get a side-by-side diff with the
+**old version on the left, new version on the right**, and only the files that
+branch actually touched.
+
+The reason this works is git's **three-dot range**:
+
+| Range | Compares against | Result |
+|-------|------------------|--------|
+| `main..HEAD` | main's *current tip* | branch changes **+** everything merged into main since — noisy |
+| `main...HEAD` | the *merge base* (where the branch forked) | only the branch's changes — what GitHub shows in a PR |
+
+```bash
+git checkout feat/phx-8888
+git fetch                    # so origin/main isn't stale
+# then in nvim: <leader>gc
+```
+
+Equivalent commands if you'd rather type them:
+
+```vim
+:DiffviewOpen origin/main...HEAD                          " the branch's diff
+:DiffviewFileHistory --range=origin/main...HEAD --right-only  " its commits
+:DiffviewOpen HEAD~3                                      " last 3 commits
+:DiffviewOpen abc123..def456                              " between two commits
+```
+
+The base branch is detected from `origin/HEAD`, falling back to
+`main` / `master` / `develop`. If detection fails, use `<leader>gC` to type it.
+One-time fix for a repo where `origin/HEAD` isn't set:
+`git remote set-head origin -a`
+
+### Diff folds — those `>` markers are collapsed code
+
+When a window enters diff mode, Neovim **overrides** your fold settings, so every
+unchanged region collapses and you only see `context:5` lines around each hunk:
+
+| Option | Normal buffers | Inside a diff |
+| -------- | ---------------- | --------------- |
+| `foldmethod` | `indent` | `diff` (forced) |
+| `foldlevel` | `99` (all open) | `0` (all closed) |
+| `foldcolumn` | `0` | `2` |
+
+The `>` in the left gutter is the closed-fold marker (LazyVim sets `foldclose` to
+the nerd-font chevron U+F460). The fold line itself reads `+-- 15 lines folded`.
+
+**Press `zR` to expand everything.** `zo` opens just the one under the cursor,
+`zM` re-collapses, and clicking the `>` in the gutter works too.
 
 ### Inside Diffview (`g?` for full help)
 
 | Key | Panel | Description |
-|-----|-------|-------------|
+| ----- | ------- | ------------- |
 | `<Tab>` / `<S-Tab>` | any | Open next / prev file's diff |
 | `]c` / `[c` | diff | Next / prev change (native diff) |
 | `<C-f>` / `<C-b>` | diff | Scroll diff down / up |
@@ -359,7 +526,7 @@
 ## Debug (DAP)
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<F5>` | normal | Start / Continue |
 | `<F8>` | n/i/t | Stop session |
 | `<F10>` | normal | Step over |
@@ -381,7 +548,7 @@
 ## Coding Utilities
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<leader>m` | normal | Toggle split / join block (treesj) |
 | `<C-a>` / `<C-x>` | n/v | Increment / decrement (booleans, hex, semver, let↔const) |
 | `[n` / `]n` | normal | Prev / next treesitter node (mini.bracketed) |
@@ -393,7 +560,7 @@
 ### Refactoring (refactoring.nvim)
 
 | Key | Mode | Description |
-|-----|------|-------------|
+| ----- | ------ | ------------- |
 | `<leader>re` | n/v | Open refactor picker |
 | `<leader>rf` | visual | Extract selection to function |
 | `<leader>rv` | visual | Extract selection to variable |
@@ -408,7 +575,7 @@
 ### Find & Replace in Files (`sed`)
 
 | Command | What it does |
-|---------|-------------|
+| --------- | ------------- |
 | `sed 's/old/new/' file` | Replace **first** match per line (prints to stdout) |
 | `sed 's/old/new/g' file` | Replace **all** matches per line |
 | `sed 's/old/new/gI' file` | Replace all, case-**I**nsensitive (GNU) |
@@ -423,7 +590,7 @@
 ### Regex with Replace
 
 | Command | What it does |
-|---------|-------------|
+| --------- | ------------- |
 | `sed -E 's/(foo)bar/\1baz/g' f` | **Extended** regex (`-E`) + backreference `\1` |
 | `sed -E 's/[0-9]+/N/g' f` | Replace runs of digits |
 | `sed -E 's/\s+$//' f` | Strip trailing whitespace |
@@ -452,7 +619,7 @@ rg -l '\boldFn\b' | xargs gsed -E -i 's/\boldFn\b/newFn/g'
 ### Searching (`rg` / `fd`)
 
 | Command | What it does |
-|---------|-------------|
+| --------- | ------------- |
 | `rg 'pat'` | Recursive search (respects `.gitignore`) |
 | `rg -i 'pat'` | Case-insensitive |
 | `rg -w 'word'` | Whole-word match |
@@ -466,7 +633,7 @@ rg -l '\boldFn\b' | xargs gsed -E -i 's/\boldFn\b/newFn/g'
 ### Text Pipeline Quickies
 
 | Command | What it does |
-|---------|-------------|
+| --------- | ------------- |
 | `awk '{print $2}'` | Print 2nd whitespace-delimited column |
 | `awk -F, '{print $1}'` | Print 1st CSV column (`-F,`) |
 | `cut -d: -f1 /etc/passwd` | Split on `:`, take field 1 |
@@ -479,12 +646,14 @@ rg -l '\boldFn\b' | xargs gsed -E -i 's/\boldFn\b/newFn/g'
 ### Optimized Suggestions for Your Setup
 
 - **Add fish abbreviations** (`~/.config/fish/config.fish`) for the verbose ones you repeat:
+
   ```fish
   abbr -a rgr 'rg -l'                       # list matching files
   abbr -a sedi 'gsed -i'                    # GNU in-place, no BSD footgun
   abbr -a ff   'fd -t f'                    # find files only
   abbr -a lower "tr '[:upper:]' '[:lower:]'"
   ```
+
 - **Make `gsed` your default mental model** — install `gnu-sed` so your scripts are portable to Linux/CI; reserve BSD `sed -i ''` only for one-offs.
 - **Dry-run before destructive in-place edits:** run the `rg -l ... | xargs gsed ...` pipe first *without* `-i` (use `gsed 's/.../.../g'` to print) so you see the result, then add `-i`.
 - **Prefer `<leader>sr` (grug-far) inside Neovim** for anything you want to eyeball; the CLI pipeline shines for headless/batch or multi-repo edits.

@@ -1,6 +1,21 @@
 return {
   "coder/claudecode.nvim",
+  enabled = false, -- temporarily testing Sidekick instead; remove this line to re-enable
   opts = {
+    -- Claude Code 2.x defaults to its "fullscreen" renderer, which draws on the
+    -- terminal's ALTERNATE screen. Alt-screen content never enters Neovim's
+    -- terminal scrollback, so the conversation could not be scrolled back past
+    -- the visible screen. Force the classic renderer so output streams into the
+    -- buffer and normal motions (<C-u>, gg, /) work. See also 'scrollback' in
+    -- lua/config/options.lua.
+    env = {
+      CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN = "1",
+    },
+    terminal = {
+      -- Stay in Normal mode when the Claude terminal gains focus so the scroll
+      -- position is preserved instead of snapping to the bottom. Press i/a to type.
+      auto_insert = false,
+    },
     diff_opts = {
       open_in_new_tab = true,
       keep_terminal_focus = true,
@@ -52,7 +67,6 @@ return {
             end
             vim.cmd("botright split")
             vim.api.nvim_set_current_buf(buf)
-            vim.cmd("startinsert")
             return
           end
         end
@@ -71,7 +85,6 @@ return {
             end
             vim.cmd("botright vsplit")
             vim.api.nvim_set_current_buf(buf)
-            vim.cmd("startinsert")
             return
           end
         end

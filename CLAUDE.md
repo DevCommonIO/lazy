@@ -24,7 +24,7 @@ See `lua/config/lazy.lua` for the full list. Key ones: TypeScript, Rust, JSON, T
 - **Completion**: `blink.cmp` (`vim.g.lazyvim_cmp = "blink.cmp"`) — Tab/S-Tab to navigate, CR to accept, C-j/C-k for snippet navigation
 - **Picker**: Telescope (`vim.g.lazyvim_picker = "telescope"`)
 - **AI**: GitHub Copilot + CopilotChat (model: `claude-sonnet-4.5`), keymaps under `<leader>C`
-- **Shell**: fish
+- **Shell**: zsh (same as iTerm2 / tmux)
 
 ### Keymap Conventions
 - Leader: `<Space>`

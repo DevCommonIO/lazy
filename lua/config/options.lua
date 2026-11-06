@@ -18,7 +18,7 @@ vim.opt.laststatus = 3
 vim.opt.scrolloff = 10
 vim.opt.wrap = false
 vim.opt.linebreak = true
-vim.opt.mouse = ""
+vim.opt.mouse = "a" -- tmux passes wheel/clicks through; Option+drag for terminal selection
 
 -- Modern command line (works great with noice.nvim)
 vim.opt.cmdheight = 0
@@ -89,7 +89,7 @@ vim.opt.formatoptions:append({ "r" })
 -- =====================================================
 -- Shell
 -- =====================================================
-vim.opt.shell = "fish"
+vim.opt.shell = "zsh" -- same shell as iTerm2 / tmux
 
 -- =====================================================
 -- Filetype additions
@@ -123,10 +123,18 @@ vim.opt.showcmd = false
 -- =====================================================
 -- Diff algorithm
 -- =====================================================
-vim.opt.diffopt:append("algorithm:histogram") -- smarter than Myers (fewer spurious hunks)
-vim.opt.diffopt:append("indent-heuristic") -- place hunks at natural code boundaries
-vim.opt.diffopt:append("linematch:60") -- match similar lines across hunks
-vim.opt.diffopt:append("context:5") -- show 5 lines of context around changes
+-- Set explicitly rather than :append() -- Neovim 0.12 ships indent-heuristic and
+-- linematch:40 by default, so appending silently duplicated them.
+vim.opt.diffopt = {
+  "internal",
+  "filler",
+  "closeoff",
+  "inline:char", -- highlight changed text within a line
+  "indent-heuristic", -- place hunks at natural code boundaries
+  "algorithm:histogram", -- smarter than Myers (fewer spurious hunks)
+  "linematch:60", -- match similar lines across hunks
+  "context:5", -- show 5 lines of context around changes
+}
 
 -- =====================================================
 -- Better editing UX
@@ -141,3 +149,11 @@ vim.opt.virtualedit = "block"
 
 -- Keep cursor position when reopening files
 vim.opt.viewoptions = { "cursor", "folds" }
+
+-- =====================================================
+-- Terminal
+-- =====================================================
+-- Lines kept beyond the visible screen in terminal buffers (Claude, lazygit, etc).
+-- Neovim's default is 10000, which long Claude conversations blow past -- older
+-- lines are then deleted and become unscrollable. Max allowed is 1000000.
+vim.opt.scrollback = 100000

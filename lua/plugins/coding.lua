@@ -76,8 +76,8 @@ return {
           accept_word = "<C-Right>",
           accept_line = "<C-Down>",
           next        = "<C-]>",
-          prev        = "<C-[>",
-          dismiss     = "<C-;>",
+          prev        = "<M-p>", -- NOT <C-[>: that is the same keycode as <Esc>
+          dismiss     = "<M-e>", -- NOT <C-;>: terminals can't send it (no CSI u)
         },
       },
       filetypes = {
